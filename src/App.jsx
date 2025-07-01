@@ -5,9 +5,9 @@ import useFlareData from "./hooks/useFlareData";
 import GlobeVisualizer from "./components/GlobeVisualizer";
 import TimelineSlider from "./components/TimelineSlider";
 import Legend from "./components/Legend";
-import Navbar from "./components/Navbar"; 
+import Navbar from "./components/Navbar";
 import RiskPage from "./pages/risk";
-// import StatusPage from "./pages/status";
+import StatusPage from "./pages/status"; // ✅ Enabled status page
 
 export default function App() {
   const { flares, loading, error, refresh } = useFlareData();
@@ -32,7 +32,7 @@ export default function App() {
   return (
     <Router>
       <div style={{ position: "relative", height: "100vh", width: "100vw", color: "#fff" }}>
-        <Navbar /> {/* ✅ Reusable Navbar */}
+        <Navbar />
 
         <Routes>
           <Route
@@ -97,20 +97,9 @@ export default function App() {
               </>
             }
           />
-          {/* <Route
-            path="/status"
-            element={
-              <StatusPage
-                flares={flares}
-                currentTime={currentTime}
-                startTime={startTime}
-                endTime={endTime}
-                playing={playing}
-                setPlaying={setPlaying}
-                setCurrentTime={setCurrentTime}
-              />
-            }
-          /> */}
+
+          <Route path="/status" element={<StatusPage flares={flares} />} /> {/* ✅ 2D map view */}
+
           <Route path="/risk" element={<RiskPage />} />
         </Routes>
       </div>
