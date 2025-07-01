@@ -31,6 +31,9 @@ export default function StatusPage({ flares }) {
       })
     : flares;
 
+  const uniqueDates = [...new Set(flares.map(f => new Date(f.peakTime).toDateString()))]
+    .sort((a, b) => new Date(b) - new Date(a));
+
   return (
     <div className="status-container">
       <h2 className="status-title">Solar Flare Status Map</h2>
@@ -68,23 +71,43 @@ export default function StatusPage({ flares }) {
             className="datepicker"
           />
 
+          <div className="flare-date-list">
+            <h4>Flare History</h4>
+            <ul>
+              {uniqueDates.map((dateStr, idx) => (
+                <li key={idx}>
+                  <button
+                    className={`flare-date-btn ${selectedDate?.toDateString() === dateStr ? "selected" : ""}`}
+                    onClick={() => setSelectedDate(new Date(dateStr))}
+                  >
+                    {dateStr}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           <p style={{ marginTop: "10px" }}>
             Showing {filteredFlares.length} flare(s){" "}
             {selectedDate ? `on ${format(selectedDate, "yyyy-MM-dd")}` : "(all dates)"}
           </p>
 
-          <div className="flare-cards">
-  {filteredFlares.map((flare, idx) => (
-    <div key={idx} className="flare-card">
-      <h4 className="flare-class">Class {flare.classType || "?"}</h4>
-      <p><strong>Start:</strong> {flare.startTime || "Unknown"}</p>
-      <p><strong>Peak:</strong> {new Date(flare.peakTime).toUTCString()}</p>
-      <p><strong>Latitude:</strong> {toDMS(flare.lat, true)}</p>
-      <p><strong>Longitude:</strong> {toDMS(flare.lng, false)}</p>
-    </div>
-  ))}
-</div>
-
+          <div className="flare-grid">
+            {filteredFlares.map((flare, idx) => (
+              <div key={idx} className="flare-card">
+                <h4 className="flare-class">
+                  Class {flare.classType || "?"}
+                  <span className={`severity ${flare.classType === "X" ? "major" : "minor"}`}>
+                    {flare.classType === "X" ? "Major" : "Minor"}
+                  </span>
+                </h4>
+                <p><strong>Start:</strong> {flare.startTime || "Unknown"}</p>
+                <p><strong>Peak:</strong> {new Date(flare.peakTime).toUTCString()}</p>
+                <p><strong>Latitude:</strong> {toDMS(flare.lat, true)}</p>
+                <p><strong>Longitude:</strong> {toDMS(flare.lng, false)}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
