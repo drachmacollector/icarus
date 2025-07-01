@@ -7,7 +7,7 @@ import { mapHelioToEarth } from '../utils/geoUtils';
 /**
  * Custom hook to fetch, cache, and refresh DONKI Solar Flare data.
  */
-export default function useFlareData() {
+export default function useFlareData({ startDate, endDate } = {}) {
   const [flares, setFlares] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -17,46 +17,36 @@ export default function useFlareData() {
     setError(null);
 
     try {
-      // Fetch raw flare events
       const data = await fetchFlareData({
-        startDate: defaultStartDateUTC(),
-        endDate: defaultEndDateUTC(),
-        catalog: 'ALL',       // default catalog per spec
-        classType: 'ALL',     // fetch all classes, we'll filter downstream
+        startDate: startDate || defaultStartDateUTC(),
+        endDate: endDate || defaultEndDateUTC(),
+        catalog: 'ALL',
+        classType: 'ALL',
         apiKey: 'fM6bs5qLVnqzn6z2GUIDXpdps8ZE3AhMAkC43EVa'
       });
-      console.log('🚀 Raw flare data:', data);
 
+      const processed = data.map(event => {
+        const loc = event.sourceLocation;
+        let lat = null;
+        let lng = null;
 
-      // Map each event to include marker lat/lng on Earth
-const processed = data.map(event => {
-  const loc = event.sourceLocation;
-  let lat = null;
-  let lng = null;
+        if (loc && /^[NS]\d+(\.\d+)?[EW]\d+(\.\d+)?$/.test(loc)) {
+          const [, ns, latStr, ew, lonStr] = loc.match(/^([NS])(\d+(?:\.\d+)?)([EW])(\d+(?:\.\d+)?)$/);
+          const helioLat = (ns === 'N' ? 1 : -1) * parseFloat(latStr);
+          const helioLon = (ew === 'E' ? 1 : -1) * parseFloat(lonStr);
+          const coords = mapHelioToEarth(helioLat, helioLon);
+          lat = coords.lat;
+          lng = coords.lng;
+        }
 
-  // Only try to parse if sourceLocation is valid (e.g. "N15E20")
-  if (loc && /^[NS]\d+(\.\d+)?[EW]\d+(\.\d+)?$/.test(loc)) {
-    const [, ns, latStr, ew, lonStr] = loc.match(/^([NS])(\d+(?:\.\d+)?)([EW])(\d+(?:\.\d+)?)$/);
-    const helioLat = (ns === 'N' ? 1 : -1) * parseFloat(latStr);
-    const helioLon = (ew === 'E' ? 1 : -1) * parseFloat(lonStr);
-    const coords = mapHelioToEarth(helioLat, helioLon);
-    lat = coords.lat;
-    lng = coords.lng;
-  }
-
-  return {
-    ...event,
-    lat,
-    lng,
-    color: 'orange',
-    size: 0.4
-  };
-})
-
-
-      .filter(Boolean); // remove nulls
-console.log("🌍 Final markers on globe:", processed);
-
+        return {
+          ...event,
+          lat,
+          lng,
+          color: 'orange',
+          size: 0.4
+        };
+      });
 
       setFlares(processed);
     } catch (err) {
@@ -65,17 +55,11 @@ console.log("🌍 Final markers on globe:", processed);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [startDate, endDate]);
 
-  // Initial load on mount
   useEffect(() => {
     loadData();
   }, [loadData]);
 
-  // Expose refresh to manually re-fetch
-  const refresh = () => {
-    loadData();
-  };
-
-  return { flares, loading, error, refresh };
+  return { flares, loading, error, refresh: loadData };
 }
