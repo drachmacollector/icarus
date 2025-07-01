@@ -6,6 +6,21 @@ import "./status.css";
 import DatePicker from "react-datepicker";
 import { format } from "date-fns";
 
+function toDMS(deg, isLat) {
+  const absolute = Math.abs(deg);
+  const degrees = Math.floor(absolute);
+  const minutesNotTruncated = (absolute - degrees) * 60;
+  const minutes = Math.floor(minutesNotTruncated);
+  const seconds = Math.floor((minutesNotTruncated - minutes) * 60);
+  let direction = "";
+  if (isLat) {
+    direction = deg >= 0 ? "N" : "S";
+  } else {
+    direction = deg >= 0 ? "E" : "W";
+  }
+  return `${degrees}°${minutes}'${seconds}" ${direction}`;
+}
+
 export default function StatusPage({ flares }) {
   const [selectedDate, setSelectedDate] = useState(null);
 
@@ -59,15 +74,17 @@ export default function StatusPage({ flares }) {
           </p>
 
           <div className="flare-cards">
-            {filteredFlares.map((flare, idx) => (
-              <div key={idx} className="flare-card">
-                <h4 className="flare-class">Class {flare.classType}</h4>
-                <p><strong>Start:</strong> {flare.startTime}</p>
-                <p><strong>Peak:</strong> {flare.peakTime}</p>
-                <p><strong>Location:</strong> {flare.lat}, {flare.lng}</p>
-              </div>
-            ))}
-          </div>
+  {filteredFlares.map((flare, idx) => (
+    <div key={idx} className="flare-card">
+      <h4 className="flare-class">Class {flare.classType || "?"}</h4>
+      <p><strong>Start:</strong> {flare.startTime || "Unknown"}</p>
+      <p><strong>Peak:</strong> {new Date(flare.peakTime).toUTCString()}</p>
+      <p><strong>Latitude:</strong> {toDMS(flare.lat, true)}</p>
+      <p><strong>Longitude:</strong> {toDMS(flare.lng, false)}</p>
+    </div>
+  ))}
+</div>
+
         </div>
       </div>
     </div>

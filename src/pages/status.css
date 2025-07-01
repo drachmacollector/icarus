@@ -40,9 +40,9 @@ body {
 .info-panel {
   flex: 1;
   padding: 1rem;
-  background-color: #1e1e1e;
+ 
   border-radius: 8px;
-  height: 60vh;
+  
   color: #ccc;
 }
 .datepicker {
