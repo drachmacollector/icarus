@@ -1,87 +1,101 @@
 // src/components/GlobeVisualizer.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import Globe from 'react-globe.gl';
-import { computeSubsolarPoint } from '../utils/geoUtils';
+import * as THREE from 'three';               // ← add this
+ import { computeSubsolarPoint } from '../utils/geoUtils';
 
-export default function GlobeVisualizer({ flares, currentTime }) {
-  const globeEl = useRef();
-  const [subsolar, setSubsolar] = useState({ lat: 0, lng: 0 });
-  const [hemisphereColor, setHemisphereColor] = useState('rgba(0,255,0,0.2)');
+ export default function GlobeVisualizer({ flares, currentTime }) {
+   const globeEl = useRef();
+   const [subsolar, setSubsolar] = useState({ lat: 0, lng: 0 });
+const [hemisphereRGB, setHemisphereRGB] = useState('green');
+const [hemisphereOpacity, setHemisphereOpacity] = useState(0.2);
+const rgbMap = {
+  green: '0,255,0',
+  yellow: '255,255,0',
+  red: '255,0,0',
+};
 
-  // Recompute subsolar point & hemisphere color whenever time or flares change
-  useEffect(() => {
-    // 1. Subsolar point for currentTime
-    const pt = computeSubsolarPoint(currentTime);
-    setSubsolar(pt);
 
-    // 2. Determine worst severity among active flares
-    const worst = flares.reduce((acc, f) => {
-      if (f.classType === 'X') return 'X';
-      if (f.classType === 'M' && acc !== 'X') return 'M';
-      return acc;
-    }, null);
+   // Memoize a single hemi‑mesh so we don’t recreate on every render
+   const hemiMeshRef = useRef();
+   if (!hemiMeshRef.current) {
+     const geom = new THREE.SphereGeometry(1.01, 32, 32, 0, Math.PI);
+     const mat = new THREE.MeshBasicMaterial({
+       color: `rgba(${rgbMap[hemisphereRGB]}, ${hemisphereOpacity})`
+,
+       side: THREE.DoubleSide,
+       transparent: true,
+     });
+     hemiMeshRef.current = new THREE.Mesh(geom, mat);
+   }
 
-    // 3. Pick color: green (none), yellow (M), red (X)
-    let color;
-    if (worst === 'X') color = 'rgba(255,0,0,0.3)';
-    else if (worst === 'M') color = 'rgba(255,255,0,0.3)';
-    else color = 'rgba(0,255,0,0.2)';
-    setHemisphereColor(color);
+useEffect(() => {
+  const pt = computeSubsolarPoint(currentTime);
+  setSubsolar(pt);
 
-  }, [currentTime, flares]);
+  const worst = flares.reduce((acc, f) => {
+    if (f.classType === 'X') return 'X';
+    if (f.classType === 'M' && acc !== 'X') return 'M';
+    return acc;
+  }, null);
 
-  // Build point data for flare markers
-  const pointsData = flares.map(f => ({
-    lat: f.markerLat,
-    lng: f.markerLng,
-    size: f.classType === 'X' ? 1.5 : 1,
-    color: f.classType === 'X' ? 'red' : 'yellow',
-    flare: f
-  }));
+let rgbColor = 'green';
+let opacity = 0.2;
 
-  return (
-    <Globe
-      ref={globeEl}
-      globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-      backgroundColor="#000011"
-      // Hemisphere shading
-      customLayerData={[subsolar]}
-      customThreeObject={() => {
-        // create a half‑sphere mesh at origin, then translate to subsolar point
-        const geometry = new THREE.SphereGeometry(1.01, 32, 32, 0, Math.PI);
-        const material = new THREE.MeshBasicMaterial({
-          color: hemisphereColor,
-          side: THREE.DoubleSide,
-          transparent: true,
-        });
-        return new THREE.Mesh(geometry, material);
-      }}
-      customThreeObjectUpdate={(obj, d) => {
-        // orient and position hemisphere to subsolar lat/lng
-        const { lat, lng } = d;
-        obj.position.setFromSphericalCoords(
-          1, 
-          (90 - lat) * (Math.PI / 180),
-          (lng + 180) * (Math.PI / 180)
-        );
-        // point it outward
-        obj.lookAt(obj.position.clone().multiplyScalar(2));
-      }}
+if (worst === 'X') {
+  rgbColor = 'red';
+  opacity = 0.3;
+} else if (worst === 'M') {
+  rgbColor = 'yellow';
+  opacity = 0.3;
+}
 
-      // Flare markers
-      pointsData={pointsData}
-      pointLat="lat"
-      pointLng="lng"
-      pointColor="color"
-      pointAltitude={0.02}
-      pointRadius="size"
-      onPointHover={(point) => {
-        if (point) globeEl.current.controls().autoRotate = false;
-      }}
-      onPointClick={(point) => {
-        // Could trigger a detailed panel here
-        alert(`Flare ${point.flare.classType} at ${point.flare.peakTime}`);
-      }}
-    />
-  );
+setHemisphereRGB(rgbColor);
+setHemisphereOpacity(opacity);
+
+hemiMeshRef.current.material.color.setStyle(rgbColor);
+hemiMeshRef.current.material.opacity = opacity;
+hemiMeshRef.current.material.needsUpdate = true;
+
+}, [currentTime, flares]);
+
+
+   const pointsData = flares.map(f => ({
+     lat: f.markerLat,
+     lng: f.markerLng,
+     size: f.classType === 'X' ? 1.5 : 1,
+     color: f.classType === 'X' ? 'red' : 'yellow',
+     flare: f
+   }));
+
+   return (
+     <Globe
+       ref={globeEl}
+       globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+       backgroundColor="#000011"
+
+       // Custom hemisphere layer
+       customLayerData={[subsolar]}
+       customThreeObject={(d) => hemiMeshRef.current}
+       customThreeObjectUpdate={(obj, { lat, lng }) => {
+         obj.position.setFromSphericalCoords(
+           1,
+           (90 - lat) * (Math.PI / 180),
+           (lng + 180) * (Math.PI / 180)
+         );
+         obj.lookAt(obj.position.clone().multiplyScalar(2));
+       }}
+
+       // Flare points
+       pointsData={pointsData}
+       pointLat="lat"
+       pointLng="lng"
+       pointColor="color"
+       pointAltitude={0.02}
+       pointRadius="size"
+       onPointClick={(p) =>
+         alert(`Flare ${p.flare.classType} peaked at ${p.flare.peakTime}`)
+       }
+     />
+   );
 }
