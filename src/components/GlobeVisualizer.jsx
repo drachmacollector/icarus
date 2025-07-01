@@ -9,6 +9,7 @@ export default function GlobeVisualizer({ flares, currentTime, cityData = [] }) 
   const [subsolar, setSubsolar] = useState({ lat: 0, lng: 0 });
   const [hemisphereRGB, setHemisphereRGB] = useState('navy');
   const [hemisphereOpacity, setHemisphereOpacity] = useState(0.75);
+  const [autoRotate, setAutoRotate] = useState(true); // ✅ New state for toggle
 
   const rgbMap = {
     green: '0,255,0',
@@ -17,11 +18,10 @@ export default function GlobeVisualizer({ flares, currentTime, cityData = [] }) 
     navy: '0,0,128',
   };
 
-  // Create reusable hemisphere mesh
+  // Hemisphere mesh
   const hemiMeshRef = useRef();
   if (!hemiMeshRef.current) {
     const geom = new THREE.SphereGeometry(1.01, 75, 75, 0, Math.PI);
-
     const mat = new THREE.MeshBasicMaterial({
       color: `rgb(${rgbMap[hemisphereRGB]})`,
       side: THREE.DoubleSide,
@@ -31,15 +31,15 @@ export default function GlobeVisualizer({ flares, currentTime, cityData = [] }) 
     hemiMeshRef.current = new THREE.Mesh(geom, mat);
   }
 
-  // Auto-rotate on mount
+  // Auto-rotate handler
   useEffect(() => {
     if (globeEl.current) {
-      globeEl.current.controls().autoRotate = true;
+      globeEl.current.controls().autoRotate = autoRotate;
       globeEl.current.controls().autoRotateSpeed = 0.8;
     }
-  }, []);
+  }, [autoRotate]);
 
-  // Update subsolar point + hemisphere color
+  // Subsolar + hemisphere color
   useEffect(() => {
     const pt = computeSubsolarPoint(currentTime);
     setSubsolar(pt);
@@ -69,7 +69,7 @@ export default function GlobeVisualizer({ flares, currentTime, cityData = [] }) 
     hemiMeshRef.current.material.needsUpdate = true;
   }, [currentTime, flares]);
 
-  // Flare marker pins (your code)
+  // Flares as points
   const pointsData = flares.map(f => ({
     lat: f.lat,
     lng: f.lng,
@@ -77,9 +77,8 @@ export default function GlobeVisualizer({ flares, currentTime, cityData = [] }) 
     color: f.color || 'orange',
     flare: f
   }));
-  console.log("🔥 Points passed to Globe:", pointsData);
 
-  // Flare arcs (teammate's code)
+  // Arcs
   const flareArcs = flares.map(f => ({
     startLat: f.lat,
     startLng: f.lng,
@@ -90,6 +89,7 @@ export default function GlobeVisualizer({ flares, currentTime, cityData = [] }) 
   }));
 
   return (
+  <div style={{ position: 'relative', height: '100%', width: '100%' }}>
     <Globe
       ref={globeEl}
       globeImageUrl="https://unpkg.com/three-globe/example/img/earth-night.jpg"
@@ -99,7 +99,6 @@ export default function GlobeVisualizer({ flares, currentTime, cityData = [] }) 
       atmosphereAltitude={0.25}
       backgroundColor="#000000"
 
-      // City lights (optional)
       pointsData={cityData}
       pointLat="lat"
       pointLng="lng"
@@ -107,7 +106,6 @@ export default function GlobeVisualizer({ flares, currentTime, cityData = [] }) 
       pointRadius={0.05}
       pointAltitude={0.01}
 
-      // Flare pins
       labelsData={pointsData}
       labelLat="lat"
       labelLng="lng"
@@ -117,7 +115,6 @@ export default function GlobeVisualizer({ flares, currentTime, cityData = [] }) 
       labelAltitude={0.02}
       onLabelClick={p => alert(`Flare ${p.flare.classType} peaked at ${p.flare.peakTime}`)}
 
-      // Flare arcs
       arcsData={flareArcs}
       arcStartLat="startLat"
       arcStartLng="startLng"
@@ -130,7 +127,6 @@ export default function GlobeVisualizer({ flares, currentTime, cityData = [] }) 
       arcAltitude={0.3}
       onArcClick={(a) => alert(`Flare ${a.flare.classType} peaked at ${a.flare.peakTime}`)}
 
-      // Hemisphere shading
       customLayerData={[subsolar]}
       customThreeObject={() => hemiMeshRef.current}
       customThreeObjectUpdate={(obj, { lat, lng }) => {
@@ -142,5 +138,43 @@ export default function GlobeVisualizer({ flares, currentTime, cityData = [] }) 
         obj.lookAt(obj.position.clone().multiplyScalar(2));
       }}
     />
-  );
+
+    {/* 💎 Top center floating Pause/Resume button */}
+    <div style={{
+      position: 'absolute',
+      top: '1rem',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      zIndex: 1000,
+    }}>
+      <button
+        onClick={() => setAutoRotate(prev => !prev)}
+        style={{
+          padding: '0.5rem 1.5rem',
+          fontSize: '1rem',
+          fontWeight: 'bold',
+          color: '#fff',
+          background: 'rgba(255, 255, 255, 0.1)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          borderRadius: '12px',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+          cursor: 'pointer',
+          transition: 'all 0.3s ease'
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.transform = 'scale(1.08)';
+          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+        }}
+      >
+        {autoRotate ? '⏸ Pause Rotation' : '▶ Resume Rotation'}
+      </button>
+    </div>
+  </div>
+);
 }

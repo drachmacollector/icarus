@@ -321,19 +321,36 @@ export default function StatusPage() {
         </div>
       </div>
 
-      {/* ✅ Home Button in Bottom-Left */}
-      <Link to="/" style={{ position: 'fixed', bottom: '1rem', left: '1rem', zIndex: 1000 }}>
-        <button style={{
-          padding: '0.5rem 1rem',
-          background: '#007acc',
-          color: 'white',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer'
-        }}>
-          🏠 Home
-        </button>
-      </Link>
+{/* ✅ Stylish Home Button (Bottom Left Floating) */}
+<Link to="/" style={{ position: 'fixed', bottom: '1rem', left: '1rem', zIndex: 1000 }}>
+  <button
+    style={{
+      padding: '0.5rem 1.2rem',
+      fontSize: '1rem',
+      fontWeight: 'bold',
+      color: '#fff',
+      background: 'rgba(255, 255, 255, 0.1)',
+      border: '1px solid rgba(255, 255, 255, 0.2)',
+      borderRadius: '12px',
+      backdropFilter: 'blur(10px)',
+      WebkitBackdropFilter: 'blur(10px)',
+      boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+      cursor: 'pointer',
+      transition: '0.3s ease',
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.transform = 'scale(1.05)';
+      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.transform = 'scale(1)';
+      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+    }}
+  >
+    🏠 Home
+  </button>
+</Link>
+
     </div>
   );
 }
