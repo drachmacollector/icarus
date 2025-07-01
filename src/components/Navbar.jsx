@@ -19,7 +19,6 @@ export default function Navbar() {
       position: 'absolute',
       top: '1rem',
       left: '1rem',
-      background: 'rgba(255,255,255,0.8)',
       padding: '0.5rem 1rem',
       borderRadius: '4px',
       fontSize: '0.9rem',

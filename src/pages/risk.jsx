@@ -8,7 +8,7 @@ import { AlignCenter } from 'lucide-react';
 export default function RiskPage() {
   const { flares, loading, error } = useFlareData();
 
-  if (loading) return <div style={{ color: 'white', padding: '1rem' }}>Loading risk data...</div>;
+  if (loading) return <div style={{ textAlign:'center' ,color: 'white', padding: '1rem' }}>Loading risk data...</div>;
   if (error) return <div style={{ color: 'red', padding: '1rem' }}>Error: {error}</div>;
 
   return (
