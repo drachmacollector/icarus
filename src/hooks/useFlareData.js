@@ -29,31 +29,30 @@ export default function useFlareData() {
 
 
       // Map each event to include marker lat/lng on Earth
-const processed = data
-  .filter(event => {
-    const loc = event.sourceLocation;
-    return loc && loc !== 'NA' && /^[NS]\d+(\.\d+)?[EW]\d+(\.\d+)?$/.test(loc);
-  })
-  .map(event => {
-    const loc = event.sourceLocation;
+const processed = data.map(event => {
+  const loc = event.sourceLocation;
+  let lat = null;
+  let lng = null;
 
-    // Extract degrees from something like "N15E20"
+  // Only try to parse if sourceLocation is valid (e.g. "N15E20")
+  if (loc && /^[NS]\d+(\.\d+)?[EW]\d+(\.\d+)?$/.test(loc)) {
     const [, ns, latStr, ew, lonStr] = loc.match(/^([NS])(\d+(?:\.\d+)?)([EW])(\d+(?:\.\d+)?)$/);
-
     const helioLat = (ns === 'N' ? 1 : -1) * parseFloat(latStr);
     const helioLon = (ew === 'E' ? 1 : -1) * parseFloat(lonStr);
+    const coords = mapHelioToEarth(helioLat, helioLon);
+    lat = coords.lat;
+    lng = coords.lng;
+  }
 
-    const { lat, lng } = mapHelioToEarth(helioLat, helioLon);
+  return {
+    ...event,
+    lat,
+    lng,
+    color: 'orange',
+    size: 0.4
+  };
+})
 
-    return {
-      ...event,
-      lat,
-      lng,
-      color: 'orange',
-      size: 0.4,
-      flare: event
-    };
-  })
 
       .filter(Boolean); // remove nulls
 console.log("🌍 Final markers on globe:", processed);

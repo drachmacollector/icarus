@@ -3,8 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import useFlareData from "./hooks/useFlareData";
 import GlobeVisualizer from "./components/GlobeVisualizer";
-import TimelineSlider from "./components/TimelineSlider";
-import Legend from "./components/Legend";
 import Navbar from "./components/Navbar";
 import RiskPage from "./pages/risk";
 import StatusPage from "./pages/status"; // ✅ Enabled status page
@@ -13,21 +11,7 @@ export default function App() {
   const { flares, loading, error, refresh } = useFlareData();
 
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [playing, setPlaying] = useState(false);
 
-  const endTime = new Date();
-  const startTime = new Date(endTime.getTime() - 24 * 60 * 60 * 1000);
-
-  useEffect(() => {
-    if (!playing) return;
-    const interval = setInterval(() => {
-      setCurrentTime((prev) => {
-        const next = new Date(prev.getTime() + 60 * 1000);
-        return next > endTime ? startTime : next;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [playing, startTime, endTime]);
 
   return (
     <Router>
@@ -39,7 +23,6 @@ export default function App() {
             path="/"
             element={
               <>
-                <Legend />
                 {loading && (
                   <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)" }}>
                     Loading solar flare data...
@@ -70,15 +53,6 @@ export default function App() {
                     width: "90%",
                   }}
                 >
-                  <TimelineSlider
-                    startTime={startTime}
-                    endTime={endTime}
-                    currentTime={currentTime}
-                    onTimeChange={setCurrentTime}
-                    playing={playing}
-                    onPlay={() => setPlaying(true)}
-                    onPause={() => setPlaying(false)}
-                  />
                   <button
                     onClick={refresh}
                     style={{
