@@ -29,10 +29,7 @@ export default function StatusPage() {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [showOnlyMapped, setShowOnlyMapped] = useState(true);
-<<<<<<< HEAD
-=======
   const [sortOrder, setSortOrder] = useState("default");
->>>>>>> b2c1a61aa58741905ce0bfd4575a788e266de9f2
 
   const { flares, loading, error } = useFlareData({
     startDate: startDate ? format(startDate, "yyyy-MM-dd") : undefined,
@@ -58,9 +55,6 @@ export default function StatusPage() {
     setSelectedDate(null);
   };
 
-<<<<<<< HEAD
-  const flaresToDisplay = showOnlyMapped ? flaresWithCoords : filteredFlares;
-=======
   const getSeverityClass = (classType) => {
     if (!classType) return "mild";
     if (classType.startsWith("X")) return "major";
@@ -105,7 +99,6 @@ export default function StatusPage() {
     if (classType.startsWith("C")) return 2;
     return 1;
   }
->>>>>>> b2c1a61aa58741905ce0bfd4575a788e266de9f2
 
   return (
     <div className="status-container">
@@ -186,27 +179,17 @@ export default function StatusPage() {
             />
             {flaresToDisplay.map((flare, idx) => {
               if (flare.lat !== null && flare.lng !== null) {
-<<<<<<< HEAD
-=======
                 const severityClass = getSeverityClass(flare.classType);
->>>>>>> b2c1a61aa58741905ce0bfd4575a788e266de9f2
                 return (
                   <CircleMarker
                     key={idx}
                     center={[flare.lat, flare.lng]}
-<<<<<<< HEAD
-                    radius={4}
-                    pathOptions={{ color: "yellow", fillColor: "yellow", fillOpacity: 1 }}
-                  >
-                    <Popup>
-=======
                     radius={severityClass === "major" ? 8 : 
                             severityClass === "moderate" ? 6 : 
                             severityClass === "minor" ? 5 : 4}
                     className={`flare-marker ${severityClass}`}
                   >
                     <Popup className="flare-popup">
->>>>>>> b2c1a61aa58741905ce0bfd4575a788e266de9f2
                       <strong>Class:</strong> {flare.classType || "?"} <br />
                       <strong>Peak:</strong> {new Date(flare.peakTime).toUTCString()} <br />
                       <strong>Location:</strong> {toDMS(flare.lat, true)}, {toDMS(flare.lng, false)}
