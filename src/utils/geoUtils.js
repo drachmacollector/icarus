@@ -6,12 +6,18 @@
  * Here we just drop the heliographic latitude onto Earth's latitude,
  * and normalize longitude into [-180,180].
  */
+// src/utils/geoUtils.js
 export function mapHelioToEarth(helioLat, helioLon) {
+  const lat = helioLat;
   let lng = helioLon;
+
+  // Heliographic longitude can be negative or >180; wrap to -180 to 180
   if (lng > 180) lng -= 360;
   if (lng < -180) lng += 360;
-  return { lat: helioLat, lng };
+
+  return { lat, lng };
 }
+
 
 /**
  * Compute the subsolar point (lat, lng) for a given UTC date.

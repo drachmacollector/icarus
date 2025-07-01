@@ -60,13 +60,19 @@ hemiMeshRef.current.material.needsUpdate = true;
 }, [currentTime, flares]);
 
 
-   const pointsData = flares.map(f => ({
-     lat: f.markerLat,
-     lng: f.markerLng,
-     size: f.classType === 'X' ? 1.5 : 1,
-     color: f.classType === 'X' ? 'red' : 'yellow',
-     flare: f
-   }));
+const pointsData = flares.map(f => {
+  console.log('👉 flare object:', f);  // verify keys
+  return {
+    lat: f.lat,
+    lng: f.lng,
+    size: f.size || 0.3,
+    color: f.color || 'orange',
+    flare: f
+  };
+});
+
+   console.log("🔥 Points passed to Globe:", pointsData);
+
 
    return (
      <Globe

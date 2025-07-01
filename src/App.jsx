@@ -60,7 +60,7 @@ export default function App() {
       )}
 
       <GlobeVisualizer
-        flares={activeFlares}
+        flares={flares}
         currentTime={currentTime}
       />
 

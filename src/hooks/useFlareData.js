@@ -23,23 +23,41 @@ export default function useFlareData() {
         endDate: defaultEndDateUTC(),
         catalog: 'ALL',       // default catalog per spec
         classType: 'ALL',     // fetch all classes, we'll filter downstream
-        apiKey: 'DEMO_KEY'    // replace with your NASA API key
+        apiKey: 'fM6bs5qLVnqzn6z2GUIDXpdps8ZE3AhMAkC43EVa'
       });
+      console.log('🚀 Raw flare data:', data);
+
 
       // Map each event to include marker lat/lng on Earth
-      const processed = data.map(event => {
-        // Convert heliographic coords into (lat,lng) on globe
-        const [helioLat, helioLon] = event.sourceLocation
-          .split(',')
-          .map(s => parseFloat(s.trim()));
-        const { lat, lng } = mapHelioToEarth(helioLat, helioLon);
+const processed = data
+  .filter(event => {
+    const loc = event.sourceLocation;
+    return loc && loc !== 'NA' && /^[NS]\d+(\.\d+)?[EW]\d+(\.\d+)?$/.test(loc);
+  })
+  .map(event => {
+    const loc = event.sourceLocation;
 
-        return {
-          ...event,
-          markerLat: lat,
-          markerLng: lng
-        };
-      });
+    // Extract degrees from something like "N15E20"
+    const [, ns, latStr, ew, lonStr] = loc.match(/^([NS])(\d+(?:\.\d+)?)([EW])(\d+(?:\.\d+)?)$/);
+
+    const helioLat = (ns === 'N' ? 1 : -1) * parseFloat(latStr);
+    const helioLon = (ew === 'E' ? 1 : -1) * parseFloat(lonStr);
+
+    const { lat, lng } = mapHelioToEarth(helioLat, helioLon);
+
+    return {
+      ...event,
+      lat,
+      lng,
+      color: 'orange',
+      size: 0.4,
+      flare: event
+    };
+  })
+
+      .filter(Boolean); // remove nulls
+console.log("🌍 Final markers on globe:", processed);
+
 
       setFlares(processed);
     } catch (err) {
