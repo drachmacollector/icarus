@@ -4,19 +4,22 @@ import Globe from 'react-globe.gl';
 import * as THREE from 'three';
 import { computeSubsolarPoint } from '../utils/geoUtils';
 
-export default function GlobeVisualizer({ flares, currentTime }) {
+export default function GlobeVisualizer({ flares, currentTime, cityData = [] }) {
   const globeEl = useRef();
   const [subsolar, setSubsolar] = useState({ lat: 0, lng: 0 });
-  const [hemisphereRGB, setHemisphereRGB] = useState('green');
-  const [hemisphereOpacity, setHemisphereOpacity] = useState(0.2);
 
-  const rgbMap = {
-    green: '0,255,0',
-    yellow: '255,255,0',
-    red: '255,0,0',
-  };
+  // Set up hemisphere shading
+  const [hemisphereRGB, setHemisphereRGB] = useState('navy');
+  const [hemisphereOpacity, setHemisphereOpacity] = useState(0.75);
 
-  // Memoize hemisphere mesh
+const rgbMap = {
+  green: '0,255,0',
+  yellow: '255,255,0',
+  red: '255,0,0',
+  navy: '0,0,128',
+};
+
+
   const hemiMeshRef = useRef();
   if (!hemiMeshRef.current) {
     const geom = new THREE.SphereGeometry(1.01, 32, 32, 0, Math.PI);
@@ -29,6 +32,13 @@ export default function GlobeVisualizer({ flares, currentTime }) {
   }
 
   useEffect(() => {
+    if (globeEl.current) {
+      globeEl.current.controls().autoRotate = true;
+      globeEl.current.controls().autoRotateSpeed = 0.8;
+    }
+  }, []);
+
+  useEffect(() => {
     const pt = computeSubsolarPoint(currentTime);
     setSubsolar(pt);
 
@@ -38,8 +48,8 @@ export default function GlobeVisualizer({ flares, currentTime }) {
       return acc;
     }, null);
 
-    let rgbColor = 'green';
-    let opacity = 0.2;
+   let rgbColor = 'navy';
+let opacity = 0.75;
 
     if (worst === 'X') {
       rgbColor = 'red';
@@ -51,35 +61,56 @@ export default function GlobeVisualizer({ flares, currentTime }) {
 
     setHemisphereRGB(rgbColor);
     setHemisphereOpacity(opacity);
+   hemiMeshRef.current.material.color.set(`rgb(${rgbMap[rgbColor]})`);
 
-    hemiMeshRef.current.material.color.setStyle(rgbColor);
     hemiMeshRef.current.material.opacity = opacity;
     hemiMeshRef.current.material.needsUpdate = true;
   }, [currentTime, flares]);
 
-  // Enable auto-rotation
-  useEffect(() => {
-    if (globeEl.current) {
-      globeEl.current.controls().autoRotate = true;
-      globeEl.current.controls().autoRotateSpeed = 1.5; // Adjust as desired
-    }
-  }, []);
-
-  const pointsData = flares.map(f => ({
-    lat: f.markerLat,
-    lng: f.markerLng,
-    size: f.classType === 'X' ? 1.5 : 1,
-    color: f.classType === 'X' ? 'red' : 'yellow',
-    flare: f
+  // Convert flares to arc format
+  const flareArcs = flares.map((f) => ({
+    startLat: f.markerLat,
+    startLng: f.markerLng,
+    endLat: f.markerLat + 15, // outward direction
+    endLng: f.markerLng + 15,
+    color: f.classType === 'X' ? ['red'] : ['orange'],
+    flare: f,
   }));
 
   return (
     <Globe
       ref={globeEl}
-      globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-      backgroundColor="#000011"
+      globeImageUrl="https://unpkg.com/three-globe/example/img/earth-night.jpg"
+      backgroundImageUrl="https://unpkg.com/three-globe/example/img/night-sky.png"
+      showAtmosphere={true}
+      atmosphereColor="blue"
+      atmosphereAltitude={0.25}
+      backgroundColor="#000000"
 
-      // Custom hemisphere layer
+      // City lights
+      pointsData={cityData}
+      pointLat="lat"
+      pointLng="lng"
+      pointColor={() => 'yellow'}
+      pointRadius={0.05}
+      pointAltitude={0.01}
+
+      // Flare arcs
+      arcsData={flareArcs}
+      arcStartLat="startLat"
+      arcStartLng="startLng"
+      arcEndLat="endLat"
+      arcEndLng="endLng"
+      arcColor="color"
+      arcDashLength={0.01}
+      arcDashGap={0}
+      arcStroke={1.2}
+      arcAltitude={0.3}
+      onArcClick={(a) =>
+        alert(`Flare ${a.flare.classType} peaked at ${a.flare.peakTime}`)
+      }
+
+      // Hemisphere shading
       customLayerData={[subsolar]}
       customThreeObject={() => hemiMeshRef.current}
       customThreeObjectUpdate={(obj, { lat, lng }) => {
@@ -90,17 +121,6 @@ export default function GlobeVisualizer({ flares, currentTime }) {
         );
         obj.lookAt(obj.position.clone().multiplyScalar(2));
       }}
-
-      // Flare points
-      pointsData={pointsData}
-      pointLat="lat"
-      pointLng="lng"
-      pointColor="color"
-      pointAltitude={0.02}
-      pointRadius="size"
-      onPointClick={(p) =>
-        alert(`Flare ${p.flare.classType} peaked at ${p.flare.peakTime}`)
-      }
     />
   );
 }
