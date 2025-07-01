@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "react-datepicker/dist/react-datepicker.css";
@@ -27,7 +28,7 @@ export default function StatusPage() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [showOnlyMapped, setShowOnlyMapped] = useState(true); // This is the toggle for lat/lng
+  const [showOnlyMapped, setShowOnlyMapped] = useState(true);
 
   const { flares, loading, error } = useFlareData({
     startDate: startDate ? format(startDate, "yyyy-MM-dd") : undefined,
@@ -53,7 +54,6 @@ export default function StatusPage() {
     setSelectedDate(null);
   };
 
-  // Determine which flares to display based on the toggle
   const flaresToDisplay = showOnlyMapped ? flaresWithCoords : filteredFlares;
 
   return (
@@ -94,27 +94,25 @@ export default function StatusPage() {
               url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
               attribution='&copy; <a href="https://carto.com/">CARTO</a>'
             />
-{flaresToDisplay.map((flare, idx) => {
-  // Only render the CircleMarker if lat and lng are valid
-  if (flare.lat !== null && flare.lng !== null) {
-    return (
-      <CircleMarker
-        key={idx}
-        center={[flare.lat, flare.lng]}
-        radius={4}
-        pathOptions={{ color: "yellow", fillColor: "yellow", fillOpacity: 1 }}
-      >
-        <Popup>
-          <strong>Class:</strong> {flare.classType || "?"} <br />
-          <strong>Peak:</strong> {new Date(flare.peakTime).toUTCString()} <br />
-          <strong>Location:</strong> {toDMS(flare.lat, true)}, {toDMS(flare.lng, false)}
-        </Popup>
-      </CircleMarker>
-    );
-  }
-  return null; // Do not render anything if lat or lng are invalid
-})}
-
+            {flaresToDisplay.map((flare, idx) => {
+              if (flare.lat !== null && flare.lng !== null) {
+                return (
+                  <CircleMarker
+                    key={idx}
+                    center={[flare.lat, flare.lng]}
+                    radius={4}
+                    pathOptions={{ color: "yellow", fillColor: "yellow", fillOpacity: 1 }}
+                  >
+                    <Popup>
+                      <strong>Class:</strong> {flare.classType || "?"} <br />
+                      <strong>Peak:</strong> {new Date(flare.peakTime).toUTCString()} <br />
+                      <strong>Location:</strong> {toDMS(flare.lat, true)}, {toDMS(flare.lng, false)}
+                    </Popup>
+                  </CircleMarker>
+                );
+              }
+              return null;
+            })}
           </MapContainer>
         </div>
 
@@ -181,6 +179,20 @@ export default function StatusPage() {
           </div>
         </div>
       </div>
+
+      {/* ✅ Home Button in Bottom-Left */}
+      <Link to="/" style={{ position: 'fixed', bottom: '1rem', left: '1rem', zIndex: 1000 }}>
+        <button style={{
+          padding: '0.5rem 1rem',
+          background: '#007acc',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer'
+        }}>
+          🏠 Home
+        </button>
+      </Link>
     </div>
   );
 }
