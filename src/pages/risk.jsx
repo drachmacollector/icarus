@@ -3,6 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import RiskDashboard from '../components/RiskDashboard';
 import useFlareData from '../hooks/useFlareData';
+import { AlignCenter } from 'lucide-react';
 
 export default function RiskPage() {
   const { flares, loading, error } = useFlareData();
@@ -11,7 +12,7 @@ export default function RiskPage() {
   if (error) return <div style={{ color: 'red', padding: '1rem' }}>Error: {error}</div>;
 
   return (
-    <div style={{ padding: '1rem', background: '#000', minHeight: '100vh', color: 'white', position: 'relative' }}>
+    <div style={{ textAlign: 'center', padding: '1rem', background: '#000', minHeight: '100vh', color: 'white', position: 'relative' }}>
       <h1>Risk Dashboard</h1>
       <RiskDashboard flares={flares} />
 
