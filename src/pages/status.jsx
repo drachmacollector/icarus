@@ -27,6 +27,7 @@ export default function StatusPage() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [showOnlyMapped, setShowOnlyMapped] = useState(true); // This is the toggle for lat/lng
 
   const { flares, loading, error } = useFlareData({
     startDate: startDate ? format(startDate, "yyyy-MM-dd") : undefined,
@@ -51,6 +52,9 @@ export default function StatusPage() {
     setEndDate(null);
     setSelectedDate(null);
   };
+
+  // Determine which flares to display based on the toggle
+  const flaresToDisplay = showOnlyMapped ? flaresWithCoords : filteredFlares;
 
   return (
     <div className="status-container">
@@ -90,20 +94,27 @@ export default function StatusPage() {
               url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
               attribution='&copy; <a href="https://carto.com/">CARTO</a>'
             />
-            {flaresWithCoords.map((flare, idx) => (
-              <CircleMarker
-                key={idx}
-                center={[flare.lat, flare.lng]}
-                radius={4}
-                pathOptions={{ color: "yellow", fillColor: "yellow", fillOpacity: 1 }}
-              >
-                <Popup>
-                  <strong>Class:</strong> {flare.classType || "?"} <br />
-                  <strong>Peak:</strong> {new Date(flare.peakTime).toUTCString()} <br />
-                  <strong>Location:</strong> {toDMS(flare.lat, true)}, {toDMS(flare.lng, false)}
-                </Popup>
-              </CircleMarker>
-            ))}
+{flaresToDisplay.map((flare, idx) => {
+  // Only render the CircleMarker if lat and lng are valid
+  if (flare.lat !== null && flare.lng !== null) {
+    return (
+      <CircleMarker
+        key={idx}
+        center={[flare.lat, flare.lng]}
+        radius={4}
+        pathOptions={{ color: "yellow", fillColor: "yellow", fillOpacity: 1 }}
+      >
+        <Popup>
+          <strong>Class:</strong> {flare.classType || "?"} <br />
+          <strong>Peak:</strong> {new Date(flare.peakTime).toUTCString()} <br />
+          <strong>Location:</strong> {toDMS(flare.lat, true)}, {toDMS(flare.lng, false)}
+        </Popup>
+      </CircleMarker>
+    );
+  }
+  return null; // Do not render anything if lat or lng are invalid
+})}
+
           </MapContainer>
         </div>
 
@@ -133,13 +144,23 @@ export default function StatusPage() {
             </ul>
           </div>
 
+          <label style={{ marginTop: "10px", display: "block" }}>
+            <input
+              type="checkbox"
+              checked={showOnlyMapped}
+              onChange={() => setShowOnlyMapped(!showOnlyMapped)}
+              style={{ marginRight: "5px" }}
+            />
+            Show only flares with location data ({flaresWithCoords.length})
+          </label>
+
           <p style={{ marginTop: "10px" }}>
-            Showing {filteredFlares.length} flare(s){" "}
+            Showing {flaresToDisplay.length} flare(s){" "}
             {selectedDate ? `on ${format(selectedDate, "yyyy-MM-dd")}` : "(all dates)"}
           </p>
 
           <div className="flare-grid">
-            {filteredFlares.map((flare, idx) => (
+            {flaresToDisplay.map((flare, idx) => (
               <div key={idx} className="flare-card">
                 <h4 className="flare-class">
                   Class {flare.classType || "?"}
@@ -147,11 +168,14 @@ export default function StatusPage() {
                     {flare.classType === "X" ? "Major" : "Minor"}
                   </span>
                 </h4>
-                <p><strong>Peak:</strong> {new Date(flare.peakTime).toUTCString()}</p>
-                <p><strong>Latitude:</strong> {toDMS(flare.lat, true)}</p>
-                <p><strong>Longitude:</strong> {toDMS(flare.lng, false)}</p>
-                <p><strong>Source:</strong> {flare.sourceLocation || "Unknown"}</p>
-                <p><strong>Linked Events:</strong> {flare.linkedEvents?.join(", ") || "None"}</p>
+                <p><strong>Peak:</strong> {flare.peakTime ? new Date(flare.peakTime).toUTCString() : "Unknown"}</p>
+                <p><strong>End:</strong> {flare.endTime ? new Date(flare.endTime).toUTCString() : "Unknown"}</p>
+                <p><strong>Location (Heliographic):</strong> {flare.sourceLocation || "NA"}</p>
+                <p><strong>Latitude:</strong> {flare.lat !== null ? toDMS(flare.lat, true) : "Unknown"}</p>
+                <p><strong>Longitude:</strong> {flare.lng !== null ? toDMS(flare.lng, false) : "Unknown"}</p>
+                <p><strong>Raw Coordinates:</strong> {flare.lat ?? "?"}, {flare.lng ?? "?"}</p>
+                <p><strong>Instruments:</strong> {flare.instruments?.map(i => i.displayName).join(", ") || "NA"}</p>
+                <p><strong>Linked Events:</strong> {flare.linkedEvents?.map(e => e.activityID).join(", ") || "None"}</p>
               </div>
             ))}
           </div>
