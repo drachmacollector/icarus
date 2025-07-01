@@ -3,21 +3,6 @@ import React from "react";
 import { AlertTriangle, Globe, Clock } from "lucide-react";
 import "./RiskDashboard.css";
 
-function toDMS(deg, isLat) {
-  const absolute = Math.abs(deg);
-  const degrees = Math.floor(absolute);
-  const minutesNotTruncated = (absolute - degrees) * 60;
-  const minutes = Math.floor(minutesNotTruncated);
-  const seconds = ((minutesNotTruncated - minutes) * 60).toFixed(1);
-
-  const direction = deg >= 0
-    ? isLat ? "N" : "E"
-    : isLat ? "S" : "W";
-
-  return `${degrees}°${minutes}'${seconds}"${direction}`;
-}
-
-
 export default function RiskDashboard({ flares }) {
   const getRiskLevel = () => {
     const hasX = flares.some(f => f.class === "X");
@@ -63,21 +48,8 @@ export default function RiskDashboard({ flares }) {
       </div>
 
 
-      {/* FLARE DETAILS */}
-
       {activeCount > 0 && (
-        <div className="flare-details">
-          <h3>Active Flare Events</h3>
-          <ul className="flare-list">
-            {flares.map((flare, idx) => (
-              <li key={idx} className="flare-item">
-                <p><strong>Class:</strong> {flare.classType || "Unknown"}</p>
-                <p><strong>Latitude:</strong> {toDMS(flare.lat, true)}</p>
-                <p><strong>Longitude:</strong> {toDMS(flare.lng, false)}</p>
-                <p><strong>Peak Time:</strong> {new Date(flare.peakTime).toUTCString()}</p>              
-            </li>
-            ))}
-          </ul>
+        <div className="flare-list">  
         </div>
       )}
     </div>
