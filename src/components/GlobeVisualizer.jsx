@@ -20,7 +20,8 @@ export default function GlobeVisualizer({ flares, currentTime, cityData = [] }) 
   // Create reusable hemisphere mesh
   const hemiMeshRef = useRef();
   if (!hemiMeshRef.current) {
-    const geom = new THREE.SphereGeometry(1.01, 32, 32, 0, Math.PI);
+    const geom = new THREE.SphereGeometry(1.01, 75, 75, 0, Math.PI);
+
     const mat = new THREE.MeshBasicMaterial({
       color: `rgb(${rgbMap[hemisphereRGB]})`,
       side: THREE.DoubleSide,

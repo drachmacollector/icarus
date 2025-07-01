@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import "./Navbar.css"; // ← Import the CSS file
+import "./Navbar.css";
 
 export default function Navbar() {
   const location = useLocation();
@@ -13,6 +13,13 @@ export default function Navbar() {
           className={`nav-link ${location.pathname === "/risk" ? "active" : ""}`}
         >
           🚨 Risk Dashboard
+        </Link>
+
+        <Link
+          to="/status"
+          className={`nav-link ${location.pathname === "/status" ? "active" : ""}`}
+        >
+          🗺️ Status Map
         </Link>
       </div>
     </nav>
