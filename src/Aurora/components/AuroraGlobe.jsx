@@ -2,6 +2,7 @@
 import React, { useMemo } from 'react';
 import Globe from 'react-globe.gl';
 import { kpToLatitudeBoundary } from '../utils/auroraUtils';
+import { Link } from 'react-router-dom'; // <-- Import this
 
 /**
  * Linearly interpolate between two hex colors.
@@ -46,20 +47,52 @@ export default function AuroraGlobe({ kpEntry }) {
   }, [kpEntry]);
 
   return (
-    <Globe
-      style={{ width: '100%', height: '100%' }}
-      globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
-      backgroundColor="rgba(0,0,0,0)"
-      showAtmosphere={true}
-      atmosphereColor="rgba(100,150,255,0.2)"
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      <Globe
+        style={{ width: '100%', height: '100%' }}
+        globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
+        backgroundColor="rgba(0,0,0,0)"
+        showAtmosphere={true}
+        atmosphereColor="rgba(100,150,255,0.2)"
 
-      pointsData={pointsData}
-      pointLat="lat"
-      pointLng="lng"
-      pointColor={d => getAuroraColor(d.kp)}
-      pointAltitude={d => 0.01 + (d.kp / 9) * 0.05}
-      pointRadius={d => 0.2 + (d.kp / 9) * 0.8}
-      pointsTransitionDuration={800}
-    />
+        pointsData={pointsData}
+        pointLat="lat"
+        pointLng="lng"
+        pointColor={d => getAuroraColor(d.kp)}
+        pointAltitude={d => 0.01 + (d.kp / 9) * 0.05}
+        pointRadius={d => 0.2 + (d.kp / 9) * 0.8}
+        pointsTransitionDuration={800}
+      />
+
+      {/* ✅ Home Button - Bottom Left */}
+      <Link to="/" style={{ position: 'fixed', bottom: '1rem', left: '1rem', zIndex: 1000 }}>
+        <button
+          style={{
+            padding: '0.5rem 1.2rem',
+            fontSize: '1rem',
+            fontWeight: 'bold',
+            color: '#fff',
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            borderRadius: '12px',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+            cursor: 'pointer',
+            transition: '0.3s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'scale(1.05)';
+            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+          }}
+        >
+          🌞 Flares
+        </button>
+      </Link>
+    </div>
   );
 }
