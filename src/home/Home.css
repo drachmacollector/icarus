@@ -1,52 +1,110 @@
-/* src/home/Home.css */
-
-.home-container {
-  max-width: 1000px;
-  margin: 2rem auto;
-  padding: 1.5rem;
-  background-color: #121212;
-  color: #f0f0f0;
+.news-container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 2rem;
+  color: #fff;
+  background-color: #0c0e2c;
+  font-family: 'Segoe UI', sans-serif;
 }
 
-h1, h2 {
-  color: #00c2ff;
-  text-align: center;
-  margin-bottom: 1rem;
-}
-
-section {
+.search-input {
+  width: 100%;
+  padding: 10px;
   margin-bottom: 2rem;
-  padding: 1rem;
-  background-color: #1f1f1f;
-  border-radius: 10px;
-  box-shadow: 0 0 8px rgba(0, 194, 255, 0.2);
-}
-
-.card {
-  background-color: #2a2a2a;
+  border: none;
   border-radius: 8px;
+  font-size: 1rem;
+  background: #1e1f3d;
+  color: #00d8ff;
+}
+
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+}
+
+.news-card {
+  background-color: #1e1f3d;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   padding: 1rem;
-  margin: 1rem 0;
-  box-shadow: 0 0 4px rgba(255, 255, 255, 0.1);
+  transition: transform 0.3s;
 }
 
-.card p {
-  margin: 0.4rem 0;
-  line-height: 1.5;
+.news-card:hover {
+  transform: scale(1.02);
 }
 
-.no-data {
+.news-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.news-card h2 {
+  font-size: 1.2rem;
+  margin-top: 0.8rem;
+}
+
+.news-card p {
+  font-size: 0.95rem;
+  color: #ccc;
+}
+
+.news-card a {
+  display: inline-block;
+  margin-top: 1rem;
+  color: #00d8ff;
+  text-decoration: none;
+}
+
+.pagination {
+  margin: 2rem 0;
   text-align: center;
-  color: #aaaaaa;
-  font-style: italic;
 }
 
-@media screen and (max-width: 600px) {
-  .home-container {
-    padding: 1rem;
-  }
+.pagination button {
+  margin: 0 6px;
+  padding: 8px 14px;
+  border: none;
+  background-color: #1e1f3d;
+  color: #00d8ff;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
 
-  section {
-    padding: 0.8rem;
-  }
+.pagination button.active,
+.pagination button:hover {
+  background-color: #00d8ff;
+  color: #0c0e2c;
+}
+
+.rss-section {
+  margin-top: 4rem;
+  background-color: #15162a;
+  padding: 1.5rem;
+  border-radius: 12px;
+}
+
+.rss-section h2 {
+  margin-bottom: 1rem;
+  color: #00d8ff;
+}
+
+.rss-section ul {
+  list-style: disc;
+  padding-left: 20px;
+}
+
+.rss-section li {
+  margin-bottom: 0.5rem;
+}
+
+.rss-section a {
+  color: #fff;
+  text-decoration: underline;
 }

@@ -1,137 +1,120 @@
-// src/pages/Home.jsx
+// src/pages/News.jsx
 import { useEffect, useState } from "react";
 import axios from "axios";
 import "./Home.css";
 
-const API_KEY = 'uUyuflFaKFRMYjTibVoz0aQ04GxdWieHkp9f8rjH'; // Replace with your actual API key
-const BASE_URL = "https://api.nasa.gov/DONKI";
+const SPACE_NEWS_API = "https://api.spaceflightnewsapi.net/v4/articles/?limit=50";
+const NASA_RSS = "https://api.rss2json.com/v1/api.json?rss_url=https://www.nasa.gov/rss/dyn/breaking_news.rss";
+const ESA_RSS = "https://api.rss2json.com/v1/api.json?rss_url=https://www.esa.int/rssfeed/Our_Activities";
 
-const endpoints = {
-  solarFlares: "FLR",
-  cmes: "CME",
-  geomagneticStorms: "GST",
-  aurora: "HSS",
-  radioBlackouts: "RBE",
-};
-
-const fetchData = async (endpoint) => {
-  const today = new Date().toISOString().split('T')[0];
-const startDate = today;
-const endDate = today;
-
-  const url = `${BASE_URL}/${endpoint}?startDate=${startDate}&endDate=${endDate}&api_key=${'uUyuflFaKFRMYjTibVoz0aQ04GxdWieHkp9f8rjH'}`;
-  const { data } = await axios.get(url);
-  return data;
-};
-
-const Home = () => {
-  const [solarFlares, setSolarFlares] = useState([]);
-  const [cmes, setCmes] = useState([]);
-  const [geoStorms, setGeoStorms] = useState([]);
-  const [aurora, setAurora] = useState([]);
-  const [radioBlackouts, setRadioBlackouts] = useState([]);
+const News = () => {
+  const [articles, setArticles] = useState([]);
+  const [nasaNews, setNasaNews] = useState([]);
+  const [esaNews, setEsaNews] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const articlesPerPage = 6;
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadAll = async () => {
+    const fetchAllNews = async () => {
       try {
-        setSolarFlares(await fetchData(endpoints.solarFlares));
-        setCmes(await fetchData(endpoints.cmes));
-        setGeoStorms(await fetchData(endpoints.geomagneticStorms));
-        setAurora(await fetchData(endpoints.aurora));
-        setRadioBlackouts(await fetchData(endpoints.radioBlackouts));
+        const [spaceRes, nasaRes, esaRes] = await Promise.all([
+          axios.get(SPACE_NEWS_API),
+          axios.get(NASA_RSS),
+          axios.get(ESA_RSS),
+        ]);
+
+        setArticles(spaceRes.data.results);
+        setNasaNews(nasaRes.data.items);
+        setEsaNews(esaRes.data.items);
       } catch (err) {
-        console.error("Error fetching DONKI data:", err);
+        console.error("Error fetching news:", err);
+      } finally {
+        setLoading(false);
       }
     };
-    loadAll();
+    fetchAllNews();
   }, []);
 
-  const renderList = (items, renderItem) =>
-    items.length > 0 ? (
-      items.map(renderItem)
-    ) : (
-      <p className="no-data">No recent data available.</p>
-    );
+  const filteredArticles = articles.filter((article) =>
+    article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    article.summary.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const indexOfLast = currentPage * articlesPerPage;
+  const indexOfFirst = indexOfLast - articlesPerPage;
+  const currentArticles = filteredArticles.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(filteredArticles.length / articlesPerPage);
 
   return (
-    <div className="container">
-      <h1>🌌 Space Weather Home</h1>
-      <section>
-        <h2>🔆 Solar Flares</h2>
-        {renderList(solarFlares, (item, i) => (
-          <div key={i} className="card">
-            <p>
-              <strong>Class:</strong> {item.classType}
-            </p>
-            <p>
-              <strong>Peak Time:</strong> {item.peakTime}
-            </p>
-            <p>
-              <strong>Source:</strong> {item.sourceLocation}
-            </p>
-          </div>
-        ))}
-      </section>
+    <div className="news-container">
+      <h1>🪐 Latest Space News</h1>
 
-      <section>
-        <h2>☄️ CMEs</h2>
-        {renderList(cmes, (item, i) => (
-          <div key={i} className="card">
-            <p>
-              <strong>Start Time:</strong> {item.startTime}
-            </p>
-            <p>
-              <strong>Note:</strong> {item.note}
-            </p>
-          </div>
-        ))}
-      </section>
+      <input
+        type="text"
+        placeholder="Search space news..."
+        className="search-input"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
 
-      <section>
-        <h2>🌍 Geomagnetic Storms</h2>
-        {renderList(geoStorms, (item, i) => (
-          <div key={i} className="card">
-            <p>
-              <strong>Start Time:</strong> {item.startTime}
-            </p>
-            <p>
-              <strong>Kp Index:</strong>{" "}
-              {item.kpIndex?.map((k) => k.kpIndex).join(", ")}
-            </p>
+      {loading ? (
+        <p>Loading news...</p>
+      ) : (
+        <>
+          <div className="news-grid">
+            {currentArticles.map((article) => (
+              <div key={article.id} className="news-card">
+                <img
+                  src={article.imageUrl || "https://via.placeholder.com/400x200?text=No+Image"}
+                  alt={article.title}
+                />
+                <h2>{article.title}</h2>
+                <p>{article.summary}</p>
+                <p><strong>Published:</strong> {new Date(article.publishedAt).toLocaleDateString()}</p>
+                <a href={article.url} target="_blank" rel="noopener noreferrer">
+                  🔗 Read Full Article
+                </a>
+              </div>
+            ))}
           </div>
-        ))}
-      </section>
 
-      <section>
-        <h2>🌈 Aurora Events (HSS)</h2>
-        {renderList(aurora, (item, i) => (
-          <div key={i} className="card">
-            <p>
-              <strong>Event Time:</strong> {item.eventTime}
-            </p>
-            <p>
-              <strong>Instruments:</strong>{" "}
-              {item.instruments?.map((inst) => inst.displayName).join(", ")}
-            </p>
+          <div className="pagination">
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentPage(i + 1)}
+                className={currentPage === i + 1 ? "active" : ""}
+              >
+                {i + 1}
+              </button>
+            ))}
           </div>
-        ))}
-      </section>
 
-      <section>
-        <h2>📡 Radio Blackouts</h2>
-        {renderList(radioBlackouts, (item, i) => (
-          <div key={i} className="card">
-            <p>
-              <strong>Start Time:</strong> {item.startTime}
-            </p>
-            <p>
-              <strong>Class:</strong> {item.classType}
-            </p>
+          <div className="rss-section">
+            <h2>🛰 NASA Headlines</h2>
+            <ul>
+              {nasaNews.slice(0, 5).map((item, i) => (
+                <li key={i}>
+                  <a href={item.link} target="_blank" rel="noopener noreferrer">{item.title}</a>
+                </li>
+              ))}
+            </ul>
+
+            <h2>🌌 ESA Headlines</h2>
+            <ul>
+              {esaNews.slice(0, 5).map((item, i) => (
+                <li key={i}>
+                  <a href={item.link} target="_blank" rel="noopener noreferrer">{item.title}</a>
+                </li>
+              ))}
+            </ul>
           </div>
-        ))}
-      </section>
+        </>
+      )}
     </div>
   );
 };
 
-export default Home;
+export default News;
