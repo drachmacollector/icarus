@@ -180,20 +180,33 @@ export default function StatusPage() {
               if (flare.lat !== null && flare.lng !== null) {
                 const severityClass = getSeverityClass(flare.classType);
                 return (
-                  <CircleMarker
-                    key={idx}
-                    center={[flare.lat, flare.lng]}
-                    radius={severityClass === "major" ? 8 : 
-                            severityClass === "moderate" ? 6 : 
-                            severityClass === "minor" ? 5 : 4}
-                    className={`flare-marker ${severityClass}`}
-                  >
-                    <Popup className="flare-popup">
-                      <strong>Class:</strong> {flare.classType || "?"} <br />
-                      <strong>Peak:</strong> {new Date(flare.peakTime).toUTCString()} <br />
-                      <strong>Location:</strong> {toDMS(flare.lat, true)}, {toDMS(flare.lng, false)}
-                    </Popup>
-                  </CircleMarker>
+                 <CircleMarker
+  key={idx}
+  center={[flare.lat, flare.lng]}
+  radius={
+    severityClass === "major" ? 8 :
+    severityClass === "moderate" ? 6 :
+    severityClass === "minor" ? 5 : 4
+  }
+  color={
+    severityClass === "major" ? "red" :
+    severityClass === "moderate" ? "orange" :
+    severityClass === "minor" ? "green" : "gray"
+  }
+  fillColor={
+    severityClass === "major" ? "red" :
+    severityClass === "moderate" ? "orange" :
+    severityClass === "minor" ? "green" : "gray"
+  }
+  fillOpacity={0.7}
+>
+  <Popup className="flare-popup">
+    <strong>Class:</strong> {flare.classType || "?"} <br />
+    <strong>Peak:</strong> {new Date(flare.peakTime).toUTCString()} <br />
+    <strong>Location:</strong> {toDMS(flare.lat, true)}, {toDMS(flare.lng, false)}
+  </Popup>
+</CircleMarker>
+
                 );
               }
               return null;

@@ -33,7 +33,7 @@ function buildUrl({
 // Create an axios instance for DONKI calls
 const api = axios.create({
   baseURL: BASE_URL,
-  timeout: 10_000
+  timeout: 60000
 });
 
 /**

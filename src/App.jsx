@@ -8,6 +8,7 @@ import RiskPage from "./Solar Flare/pages/risk";
 import StatusPage from "./Solar Flare/pages/status";
 import CmeTracker from './CME/components/CmeTracker';
 import Home from './home/Home'; 
+import AuroraForecast from './Aurora/components/AuroraForecast';
 
 import './App.css'; // 
 
@@ -42,6 +43,7 @@ export default function App() {
           <Route path="/risk" element={<RiskPage />} />
           <Route path="/CmeTracker" element={<CmeTracker />} />
            <Route path="/home" element={<Home />} />
+          <Route path="/AuroraForecast" element={<AuroraForecast />} />
         </Routes>
       </div>
     </Router>
