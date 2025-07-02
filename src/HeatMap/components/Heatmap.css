@@ -1,0 +1,51 @@
+/* Heatmap.css */
+
+.datepicker-input {
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #aaa;
+  background-color: #222;
+  color: #f0f0f0;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.datepicker-input:focus {
+  border-color: #00aaff;
+  box-shadow: 0 0 4px rgba(0, 170, 255, 0.5);
+}
+
+label {
+  font-size: 0.88rem;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 4px;
+}
+
+input[type="checkbox"] {
+  transform: scale(1.2);
+  cursor: pointer;
+}
+
+input[type="checkbox"] + label {
+  cursor: pointer;
+  margin-left: 4px;
+}
+
+h3 {
+  font-size: 1.1rem;
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 4px;
+  margin-bottom: 1rem;
+}
+button {
+  background-color: #00aaff;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}

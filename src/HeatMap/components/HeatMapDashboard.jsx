@@ -6,6 +6,7 @@ import useFlareData from '../../Solar Flare/hooks/useFlareData';
 import useCmeData from '../../CME/hooks/useCmeData';
 import { buildHeatmapPoints } from '../utils/heatmapUtils';
 import HeatMapGlobe from './HeatMapGlobe';
+import './Heatmap.css';
 
 export default function HeatMapDashboard() {
   // Date range state
