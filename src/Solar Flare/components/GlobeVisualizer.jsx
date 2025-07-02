@@ -4,14 +4,20 @@ import Globe from 'react-globe.gl';
 import * as THREE from 'three';
 import { computeSubsolarPoint } from '../utils/geoUtils';
 import HeatMapDashboard from '../../HeatMap/components/HeatMapDashboard';
+import CmeTracker from '../../CME/components/CmeTracker'; // ✅ Import your CME Tracker component
 
-export default function GlobeVisualizer({ flares, currentTime, cityData = [], heatmapData = [] }) {
+export default function GlobeVisualizer({
+  flares,
+  currentTime,
+  cityData = [],
+  heatmapData = []
+}) {
   const globeEl = useRef();
   const [subsolar, setSubsolar] = useState({ lat: 0, lng: 0 });
   const [hemisphereRGB, setHemisphereRGB] = useState('navy');
   const [hemisphereOpacity, setHemisphereOpacity] = useState(0.75);
   const [autoRotate, setAutoRotate] = useState(true);
-  const [showHeatmap, setShowHeatmap] = useState(false);
+  const [showMode, setShowMode] = useState('flares'); // 'flares', 'heatmap', 'cme'
 
   const rgbMap = {
     green: '0,255,0',
@@ -20,7 +26,6 @@ export default function GlobeVisualizer({ flares, currentTime, cityData = [], he
     navy: '0,0,128',
   };
 
-  // Hemisphere mesh
   const hemiMeshRef = useRef();
   if (!hemiMeshRef.current) {
     const geom = new THREE.SphereGeometry(1.01, 75, 75, 0, Math.PI);
@@ -33,7 +38,6 @@ export default function GlobeVisualizer({ flares, currentTime, cityData = [], he
     hemiMeshRef.current = new THREE.Mesh(geom, mat);
   }
 
-  // Auto-rotate
   useEffect(() => {
     if (globeEl.current) {
       globeEl.current.controls().autoRotate = autoRotate;
@@ -41,7 +45,6 @@ export default function GlobeVisualizer({ flares, currentTime, cityData = [], he
     }
   }, [autoRotate]);
 
-  // Subsolar and hemisphere
   useEffect(() => {
     const pt = computeSubsolarPoint(currentTime);
     setSubsolar(pt);
@@ -70,7 +73,6 @@ export default function GlobeVisualizer({ flares, currentTime, cityData = [], he
     hemiMeshRef.current.material.needsUpdate = true;
   }, [currentTime, flares]);
 
-  // Ensure valid flare points
   const flarePoints = flares.map(f => ({
     lat: f.lat,
     lng: f.lng,
@@ -88,7 +90,6 @@ export default function GlobeVisualizer({ flares, currentTime, cityData = [], he
     flare: f
   }));
 
-  // Process heatmap safely
   const heatPoints = heatmapData.map(d => {
     const intensity = Math.max(0, Math.min(1, d.intensity ?? 0));
     let color = 'green';
@@ -104,53 +105,79 @@ export default function GlobeVisualizer({ flares, currentTime, cityData = [], he
     };
   });
 
-  const activeLabelsData = showHeatmap ? heatPoints : flarePoints;
-
   return (
     <div style={{ position: 'relative', height: '100%', width: '100%' }}>
-      <Globe
-        ref={globeEl}
-        globeImageUrl="https://unpkg.com/three-globe/example/img/earth-night.jpg"
-        backgroundImageUrl="https://unpkg.com/three-globe/example/img/night-sky.png"
-        showAtmosphere={true}
-        atmosphereColor="blue"
-        atmosphereAltitude={0.25}
-        backgroundColor="#000000"
+      {/* === FLARE GLOBE === */}
+      {showMode === 'flares' && (
+        <Globe
+          ref={globeEl}
+          globeImageUrl="https://unpkg.com/three-globe/example/img/earth-night.jpg"
+          backgroundImageUrl="https://unpkg.com/three-globe/example/img/night-sky.png"
+          showAtmosphere={true}
+          atmosphereColor="blue"
+          atmosphereAltitude={0.25}
+          backgroundColor="#000000"
 
-        labelsData={activeLabelsData}
-        labelLat="lat"
-        labelLng="lng"
-        labelText={() => ''}
-        labelDotRadius="size"
-        labelColor={(d) => d.color || 'orange'}
-        labelAltitude={0.02}
-        onLabelClick={p => p.flare && alert(`Flare ${p.flare.classType} peaked at ${p.flare.peakTime}`)}
+          labelsData={flarePoints}
+          labelLat="lat"
+          labelLng="lng"
+          labelText={() => ''}
+          labelDotRadius="size"
+          labelColor="color"
+          labelAltitude={0.02}
+          onLabelClick={p => alert(`Flare ${p.flare.classType} peaked at ${p.flare.peakTime}`)}
 
-        arcsData={showHeatmap ? [] : flareArcs}
-        arcStartLat="startLat"
-        arcStartLng="startLng"
-        arcEndLat="endLat"
-        arcEndLng="endLng"
-        arcColor="color"
-        arcDashLength={0.01}
-        arcDashGap={0}
-        arcStroke={1.2}
-        arcAltitude={0.3}
-        onArcClick={(a) => a.flare && alert(`Flare ${a.flare.classType} peaked at ${a.flare.peakTime}`)}
+          arcsData={flareArcs}
+          arcStartLat="startLat"
+          arcStartLng="startLng"
+          arcEndLat="endLat"
+          arcEndLng="endLng"
+          arcColor="color"
+          arcDashLength={0.01}
+          arcDashGap={0}
+          arcStroke={1.2}
+          arcAltitude={0.3}
+          onArcClick={a => alert(`Flare ${a.flare.classType} peaked at ${a.flare.peakTime}`)}
 
-        customLayerData={[subsolar]}
-        customThreeObject={() => hemiMeshRef.current}
-        customThreeObjectUpdate={(obj, { lat, lng }) => {
-          obj.position.setFromSphericalCoords(
-            1,
-            (90 - lat) * (Math.PI / 180),
-            (lng + 180) * (Math.PI / 180)
-          );
-          obj.lookAt(obj.position.clone().multiplyScalar(2));
-        }}
-      />
+          customLayerData={[subsolar]}
+          customThreeObject={() => hemiMeshRef.current}
+          customThreeObjectUpdate={(obj, { lat, lng }) => {
+            obj.position.setFromSphericalCoords(
+              1,
+              (90 - lat) * (Math.PI / 180),
+              (lng + 180) * (Math.PI / 180)
+            );
+            obj.lookAt(obj.position.clone().multiplyScalar(2));
+          }}
+        />
+      )}
 
-      {/* Pause/Resume Button */}
+      {/* === HEATMAP GLOBE === */}
+      {showMode === 'heatmap' && (
+        <Globe
+          globeImageUrl="https://unpkg.com/three-globe/example/img/earth-night.jpg"
+          backgroundImageUrl="https://unpkg.com/three-globe/example/img/night-sky.png"
+          showAtmosphere={true}
+          atmosphereColor="blue"
+          atmosphereAltitude={0.25}
+          backgroundColor="#000000"
+
+          labelsData={heatPoints}
+          labelLat="lat"
+          labelLng="lng"
+          labelText={() => ''}
+          labelDotRadius="size"
+          labelColor="color"
+          labelAltitude={0.02}
+        />
+      )}
+
+      {/* === CME GLOBE (imported component) === */}
+      {showMode === 'cme' && (
+        <CmeTracker />
+      )}
+
+      {/* === CONTROL BUTTONS === */}
       <div style={{
         position: 'absolute',
         top: '1rem',
@@ -160,23 +187,18 @@ export default function GlobeVisualizer({ flares, currentTime, cityData = [], he
         display: 'flex',
         gap: '1rem'
       }}>
-        <button
-          onClick={() => setAutoRotate(prev => !prev)}
-          style={buttonStyle}
-        >
-          {autoRotate ? '⏸ Pause Rotation' : '▶ Resume Rotation'}
-        </button>
-
-        <button
-          onClick={() => setShowHeatmap(prev => !prev)}
-          style={buttonStyle}
-        >
-          {showHeatmap ? '🛰 Show Flares' : '🔥 Show Heatmap'}
-        </button>
+        {showMode === 'flares' && (
+          <button onClick={() => setAutoRotate(prev => !prev)} style={buttonStyle}>
+            {autoRotate ? '⏸ Pause Rotation' : '▶ Resume Rotation'}
+          </button>
+        )}
+        <button onClick={() => setShowMode('flares')} style={buttonStyle}>🌞 Flares</button>
+        <button onClick={() => setShowMode('heatmap')} style={buttonStyle}>🔥 Heatmap</button>
+        <button onClick={() => setShowMode('cme')} style={buttonStyle}>☄️ CME</button>
       </div>
 
-      {/* Optional full dashboard rendering below */}
-      {showHeatmap && (
+      {/* === HEATMAP DASHBOARD === */}
+      {showMode === 'heatmap' && (
         <div style={{ position: 'absolute', bottom: 0, width: '100%', zIndex: 500 }}>
           <HeatMapDashboard />
         </div>
@@ -185,7 +207,6 @@ export default function GlobeVisualizer({ flares, currentTime, cityData = [], he
   );
 }
 
-// Reusable button style
 const buttonStyle = {
   padding: '0.5rem 1.5rem',
   fontSize: '1rem',
