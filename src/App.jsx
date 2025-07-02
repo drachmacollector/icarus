@@ -12,6 +12,7 @@ import AuroraForecast from './Aurora/components/AuroraForecast';
 import HeatMapGlobe from './HeatMap/components/HeatMapGlobe';
 import HeatMapDashboard from './HeatMap/components/HeatMapDashboard';
 import Timeline from "./timeline/Timeline";
+import Home from "./home/Home";
 
 import './App.css'; // 
 
@@ -48,6 +49,7 @@ export default function App() {
            <Route path="/News" element={<News />} />
           <Route path="/AuroraForecast" element={<AuroraForecast />} />
           <Route path="/HeatMapDashboard" element={<HeatMapDashboard />} />
+          <Route path="/Home" element={<Home />} />
             <Route path="/timeline" element={<Timeline />} />
         </Routes>
       </div>
