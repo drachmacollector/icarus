@@ -12,7 +12,7 @@ export default function HeatMapGlobe({ points }) {
   return (
     <Globe
       style={{ width: '100%', height: '100vh' }}
-      globeImageUrl="//unpkg.com/three-globe/example/img/earth-dark.jpg"
+      globeImageUrl="https://unpkg.com/three-globe/example/img/earth-night.jpg"
       backgroundColor="rgba(0,0,0,0)"
 
       // heatmap layer
