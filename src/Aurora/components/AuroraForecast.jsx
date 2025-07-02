@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import useAuroraData from '../hooks/useAuroraData';
 import AuroraGlobe from './AuroraGlobe';
 import AuroraTimeline from './AuroraTimeline';
+import './AuroraForecast.css';
 
 export default function AuroraForecast() {
   const { kpForecast, loading, error } = useAuroraData();
@@ -12,20 +13,28 @@ export default function AuroraForecast() {
   const active = selected || kpForecast[0];
 
   return (
-    <div style={{ display:'flex', flexDirection:'column', height:'100vh', background:'#000' }}>
-      <div style={{ flex:'1 1 auto', position:'relative' }}>
-        {loading && <div style={{ position:'absolute', top:10, left:10, color:'white' }}>Loading…</div>}
-        {error   && <div style={{ position:'absolute', top:10, left:10, color:'red' }}>{error}</div>}
+    <div className="aurora-container">
+      <div className="aurora-globe-section">
+        {loading && <div className="aurora-status">Loading…</div>}
+        {error && <div className="aurora-status error">{error}</div>}
         <AuroraGlobe kpEntry={active} />
       </div>
-      <div style={{
-        padding: '1rem',
-        background:'#111',
-        color:'#eee',
-        display:'flex',
-        alignItems:'center'
-      }}>
+
+      <div className="aurora-timeline-section">
+        <div className="aurora-timeline-header">
+          <h3>Kp Index Forecast Timeline</h3>
+          <p>Click a bar to see aurora strength for that hour.</p>
+        </div>
         <AuroraTimeline kpForecast={kpForecast} onSelectHour={setSelected} />
+        <div className="aurora-footer">
+          <a 
+            href="https://www.swpc.noaa.gov/products/planetary-k-index" 
+            target="_blank" 
+            rel="noopener noreferrer"
+          >
+            Learn more about Aurora Forecasts →
+          </a>
+        </div>
       </div>
     </div>
   );

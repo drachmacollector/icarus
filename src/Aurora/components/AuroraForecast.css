@@ -1,0 +1,55 @@
+/* src/aurora/components/AuroraForecast.css */
+
+.aurora-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #000;
+  font-family: 'Segoe UI', sans-serif;
+  color: #eee;
+}
+
+.aurora-globe-section {
+  flex: 1 1 auto;
+  position: relative;
+}
+
+.aurora-status {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: white;
+  font-size: 1rem;
+}
+
+.aurora-status.error {
+  color: red;
+}
+
+.aurora-timeline-section {
+  background: #111;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.aurora-timeline-header {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.aurora-footer {
+  margin-top: 0.8rem;
+}
+
+.aurora-footer a {
+  color: #7fffd4;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: opacity 0.3s;
+}
+
+.aurora-footer a:hover {
+  opacity: 0.75;
+}
