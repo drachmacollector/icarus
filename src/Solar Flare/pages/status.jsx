@@ -142,7 +142,7 @@ export default function StatusPage() {
             </div>
             
             <button className="reset-btn" onClick={resetDateRange}>
-              Reset Range
+              Reset Range (Last 30 days)
             </button>
           </div>
         </div>
@@ -198,7 +198,7 @@ export default function StatusPage() {
     severityClass === "moderate" ? "orange" :
     severityClass === "minor" ? "green" : "gray"
   }
-  fillOpacity={0.7}
+  fillOpacity={0.5}
 >
   <Popup className="flare-popup">
     <strong>Class:</strong> {flare.classType || "?"} <br />

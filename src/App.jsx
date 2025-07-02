@@ -3,12 +3,14 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import useFlareData from "./Solar Flare/hooks/useFlareData";
 import GlobeVisualizer from "./Solar Flare/components/GlobeVisualizer";
-import Navbar from "./Solar Flare/components/Navbar";
+import Navbar from "./Navbar";
 import RiskPage from "./Solar Flare/pages/risk";
 import StatusPage from "./Solar Flare/pages/status";
 import CmeTracker from './CME/components/CmeTracker';
 import Home from './home/Home'; 
 import AuroraForecast from './Aurora/components/AuroraForecast';
+import HeatMapGlobe from './HeatMap/components/HeatMapGlobe';
+import HeatMapDashboard from './HeatMap/components/HeatMapDashboard';
 
 import './App.css'; // 
 
@@ -44,6 +46,7 @@ export default function App() {
           <Route path="/CmeTracker" element={<CmeTracker />} />
            <Route path="/home" element={<Home />} />
           <Route path="/AuroraForecast" element={<AuroraForecast />} />
+          <Route path="/HeatMapDashboard" element={<HeatMapDashboard />} />
         </Routes>
       </div>
     </Router>

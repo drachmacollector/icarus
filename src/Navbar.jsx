@@ -32,6 +32,12 @@ export default function Navbar() {
       <div className="navbar-links">
 
         <Link
+          to="/HeatMapDashboard"
+          className={`nav-link ${location.pathname === "/risk" ? "active" : ""}`}
+        >
+          🚨 HeatMap
+        </Link>
+        <Link
           to="/CmeTracker"
           className={`nav-link ${location.pathname === "/risk" ? "active" : ""}`}
         >
