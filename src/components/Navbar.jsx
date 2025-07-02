@@ -30,19 +30,28 @@ export default function Navbar() {
     </div>
     <nav className="navbar">
       <div className="navbar-links">
+
+        <Link
+          to="/CmeTracker"
+          className={`nav-link ${location.pathname === "/risk" ? "active" : ""}`}
+        >
+          🚨 CME
+        </Link>
+
         <Link
           to="/risk"
           className={`nav-link ${location.pathname === "/risk" ? "active" : ""}`}
         >
           🚨 Risk Dashboard
         </Link>
-
         <Link
           to="/status"
           className={`nav-link ${location.pathname === "/status" ? "active" : ""}`}
         >
           🗺️ Status Map
         </Link>
+        
+        
       </div>
     </nav>
     </>
