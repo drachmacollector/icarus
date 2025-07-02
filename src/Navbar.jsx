@@ -22,7 +22,7 @@ export default function Navbar() {
     </div>
     <nav className="navbar">
       <div className="navbar-links">
-        <Link to="/home" className={`nav-link ${location.pathname === "/home" ? "active" : ""}`}>News</Link>
+        <Link to="/News" className={`nav-link ${location.pathname === "/News" ? "active" : ""}`}>News</Link>
         <Link
           to="/AuroraForecast"
           className={`nav-link ${location.pathname === "/risk" ? "active" : ""}`}
