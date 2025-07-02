@@ -1,20 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import useFlareData from "./hooks/useFlareData";
 import GlobeVisualizer from "./components/GlobeVisualizer";
 import Navbar from "./components/Navbar";
 import RiskPage from "./pages/risk";
-import StatusPage from "./pages/status"; // ✅ Enabled status page
+import StatusPage from "./pages/status";
 import CmeTracker from './CME/components/CmeTracker';
 
 export default function App() {
   const { flares, loading, error, refresh } = useFlareData();
-
   const [currentTime, setCurrentTime] = useState(new Date());
 
-
-  return (<>
+  return (
     <Router>
       <div style={{ position: "relative", height: "100vh", width: "100vw", color: "#fff" }}>
         <Navbar />
@@ -73,12 +71,11 @@ export default function App() {
             }
           />
 
-          <Route path="/status" element={<StatusPage flares={flares} />} /> {/* ✅ 2D map view */}
-
+          <Route path="/status" element={<StatusPage flares={flares} />} />
           <Route path="/risk" element={<RiskPage />} />
+          <Route path="/CmeTracker" element={<CmeTracker />} />
         </Routes>
       </div>
     </Router>
-    <CmeTracker />;</>
   );
 }
