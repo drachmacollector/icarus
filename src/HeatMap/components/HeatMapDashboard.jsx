@@ -10,86 +10,98 @@ import HeatMapGlobe from './HeatMapGlobe';
 export default function HeatMapDashboard() {
   // Date range state
   const [startDate, setStartDate] = useState(null);
-  const [endDate,   setEndDate]   = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   // Toggles
   const [showFlares, setShowFlares] = useState(true);
-  const [showCmes,   setShowCmes]   = useState(true);
+  const [showCmes, setShowCmes] = useState(true);
 
   // Load raw data
   const { flares } = useFlareData({
-    startDate: startDate?.toISOString().slice(0,10),
-    endDate:   endDate  ?.toISOString().slice(0,10)
+    startDate: startDate?.toISOString().slice(0, 10),
+    endDate: endDate?.toISOString().slice(0, 10)
   });
-  const { cmes }   = useCmeData({
-    startDate: startDate?.toISOString().slice(0,10),
-    endDate:   endDate  ?.toISOString().slice(0,10)
+  const { cmes } = useCmeData({
+    startDate: startDate?.toISOString().slice(0, 10),
+    endDate: endDate?.toISOString().slice(0, 10)
   });
 
-  // Build the points based on toggles
+  // Combine data based on toggles
   const points = useMemo(() => {
     const f = showFlares ? flares : [];
-    const c = showCmes   ? cmes   : [];
+    const c = showCmes ? cmes : [];
     return buildHeatmapPoints(f, c);
   }, [flares, cmes, showFlares, showCmes]);
 
   return (
-    <div style={{ display:'flex', height:'100vh' }}>
-      {/* <aside style={{
-        width: 250, padding: 16, background:'#111', color:'#eee', overflowY:'auto'
+    <div style={{ height: '100vh', width: '100%', position: 'relative' }}>
+      {/* === Heatmap Controls Overlay === */}
+      <div style={{
+        position: 'absolute',
+        top: '1rem',
+        left: '1rem',
+        zIndex: 1000,
+        background: 'rgba(0,0,0,0.65)',
+        padding: '1rem',
+        borderRadius: '12px',
+        color: '#fff',
+        width: '250px',
+        fontSize: '0.9rem',
+        backdropFilter: 'blur(6px)'
       }}>
-        <h3>Heatmap Controls</h3>
+        <h3 style={{ marginTop: 0, marginBottom: '1rem' }}>Heatmap Controls</h3>
 
-        <div style={{ marginBottom:12 }}>
-          <label>Start Date:</label><br/>
+        <div style={{ marginBottom: 12 }}>
+          <label>Start Date:</label><br />
           <DatePicker
             selected={startDate}
             onChange={setStartDate}
             dateFormat="yyyy-MM-dd"
             placeholderText="Last 30 days"
             maxDate={new Date()}
+            className="datepicker-input"
           />
         </div>
 
-        <div style={{ marginBottom:12 }}>
-          <label>End Date:</label><br/>
+        <div style={{ marginBottom: 12 }}>
+          <label>End Date:</label><br />
           <DatePicker
             selected={endDate}
             onChange={setEndDate}
             dateFormat="yyyy-MM-dd"
             placeholderText="Today"
             maxDate={new Date()}
+            className="datepicker-input"
           />
         </div>
 
-        <div style={{ marginBottom:12 }}>
+        <div style={{ marginBottom: 12 }}>
           <input
             type="checkbox"
             checked={showFlares}
             onChange={() => setShowFlares(v => !v)}
             id="flr"
           />
-          <label htmlFor="flr" style={{ marginLeft:4 }}>Show Solar Flares ({flares.length})</label>
+          <label htmlFor="flr" style={{ marginLeft: 6 }}>Show Solar Flares ({flares.length})</label>
         </div>
 
-        <div style={{ marginBottom:12 }}>
+        <div style={{ marginBottom: 12 }}>
           <input
             type="checkbox"
             checked={showCmes}
             onChange={() => setShowCmes(v => !v)}
             id="cme"
           />
-          <label htmlFor="cme" style={{ marginLeft:4 }}>Show CMEs ({cmes.length})</label>
+          <label htmlFor="cme" style={{ marginLeft: 6 }}>Show CMEs ({cmes.length})</label>
         </div>
 
-        <div style={{ marginTop:20 }}>
+        <div style={{ marginTop: 16 }}>
           <strong>Total points:</strong> {points.length}
         </div>
-      </aside> */}
+      </div>
 
-      <main style={{ flex:'1 1 auto', position:'relative' }}>
-        <HeatMapGlobe points={points} />
-      </main>
+      {/* === HeatMap Globe === */}
+      <HeatMapGlobe points={points} />
     </div>
   );
 }
