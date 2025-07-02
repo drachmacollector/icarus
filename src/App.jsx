@@ -6,6 +6,7 @@ import GlobeVisualizer from "./components/GlobeVisualizer";
 import Navbar from "./components/Navbar";
 import RiskPage from "./pages/risk";
 import StatusPage from "./pages/status"; // ✅ Enabled status page
+import CmeTracker from './CME/components/CmeTracker';
 
 export default function App() {
   const { flares, loading, error, refresh } = useFlareData();
@@ -13,7 +14,7 @@ export default function App() {
   const [currentTime, setCurrentTime] = useState(new Date());
 
 
-  return (
+  return (<>
     <Router>
       <div style={{ position: "relative", height: "100vh", width: "100vw", color: "#fff" }}>
         <Navbar />
@@ -78,5 +79,6 @@ export default function App() {
         </Routes>
       </div>
     </Router>
+    <CmeTracker />;</>
   );
 }
