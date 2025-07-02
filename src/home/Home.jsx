@@ -1,24 +1,25 @@
 // src/pages/Home.jsx
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import './Home.css';
+import { useEffect, useState } from "react";
+import axios from "axios";
+import "./Home.css";
 
-
-const API_KEY = 'DEMO_KEY'; // Replace with your actual API key
-const BASE_URL = 'https://api.nasa.gov/DONKI';
+const API_KEY = 'uUyuflFaKFRMYjTibVoz0aQ04GxdWieHkp9f8rjH'; // Replace with your actual API key
+const BASE_URL = "https://api.nasa.gov/DONKI";
 
 const endpoints = {
-  solarFlares: 'FLR',
-  cmes: 'CME',
-  geomagneticStorms: 'GST',
-  aurora: 'HSS',
-  radioBlackouts: 'RBE',
+  solarFlares: "FLR",
+  cmes: "CME",
+  geomagneticStorms: "GST",
+  aurora: "HSS",
+  radioBlackouts: "RBE",
 };
 
 const fetchData = async (endpoint) => {
-  const endDate = new Date().toISOString().split('T')[0];
-  const startDate = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
-  const url = `${BASE_URL}/${endpoint}?startDate=${startDate}&endDate=${endDate}&api_key=${API_KEY}`;
+  const today = new Date().toISOString().split('T')[0];
+const startDate = today;
+const endDate = today;
+
+  const url = `${BASE_URL}/${endpoint}?startDate=${startDate}&endDate=${endDate}&api_key=${'uUyuflFaKFRMYjTibVoz0aQ04GxdWieHkp9f8rjH'}`;
   const { data } = await axios.get(url);
   return data;
 };
@@ -46,7 +47,11 @@ const Home = () => {
   }, []);
 
   const renderList = (items, renderItem) =>
-    items.length > 0 ? items.map(renderItem) : <p className="no-data">No recent data available.</p>;
+    items.length > 0 ? (
+      items.map(renderItem)
+    ) : (
+      <p className="no-data">No recent data available.</p>
+    );
 
   return (
     <div className="container">
@@ -55,9 +60,15 @@ const Home = () => {
         <h2>🔆 Solar Flares</h2>
         {renderList(solarFlares, (item, i) => (
           <div key={i} className="card">
-            <p><strong>Class:</strong> {item.classType}</p>
-            <p><strong>Peak Time:</strong> {item.peakTime}</p>
-            <p><strong>Source:</strong> {item.sourceLocation}</p>
+            <p>
+              <strong>Class:</strong> {item.classType}
+            </p>
+            <p>
+              <strong>Peak Time:</strong> {item.peakTime}
+            </p>
+            <p>
+              <strong>Source:</strong> {item.sourceLocation}
+            </p>
           </div>
         ))}
       </section>
@@ -66,8 +77,12 @@ const Home = () => {
         <h2>☄️ CMEs</h2>
         {renderList(cmes, (item, i) => (
           <div key={i} className="card">
-            <p><strong>Start Time:</strong> {item.startTime}</p>
-            <p><strong>Note:</strong> {item.note}</p>
+            <p>
+              <strong>Start Time:</strong> {item.startTime}
+            </p>
+            <p>
+              <strong>Note:</strong> {item.note}
+            </p>
           </div>
         ))}
       </section>
@@ -76,8 +91,13 @@ const Home = () => {
         <h2>🌍 Geomagnetic Storms</h2>
         {renderList(geoStorms, (item, i) => (
           <div key={i} className="card">
-            <p><strong>Start Time:</strong> {item.startTime}</p>
-            <p><strong>Kp Index:</strong> {item.kpIndex?.map(k => k.kpIndex).join(', ')}</p>
+            <p>
+              <strong>Start Time:</strong> {item.startTime}
+            </p>
+            <p>
+              <strong>Kp Index:</strong>{" "}
+              {item.kpIndex?.map((k) => k.kpIndex).join(", ")}
+            </p>
           </div>
         ))}
       </section>
@@ -86,8 +106,13 @@ const Home = () => {
         <h2>🌈 Aurora Events (HSS)</h2>
         {renderList(aurora, (item, i) => (
           <div key={i} className="card">
-            <p><strong>Event Time:</strong> {item.eventTime}</p>
-            <p><strong>Instruments:</strong> {item.instruments?.map(inst => inst.displayName).join(', ')}</p>
+            <p>
+              <strong>Event Time:</strong> {item.eventTime}
+            </p>
+            <p>
+              <strong>Instruments:</strong>{" "}
+              {item.instruments?.map((inst) => inst.displayName).join(", ")}
+            </p>
           </div>
         ))}
       </section>
@@ -96,8 +121,12 @@ const Home = () => {
         <h2>📡 Radio Blackouts</h2>
         {renderList(radioBlackouts, (item, i) => (
           <div key={i} className="card">
-            <p><strong>Start Time:</strong> {item.startTime}</p>
-            <p><strong>Class:</strong> {item.classType}</p>
+            <p>
+              <strong>Start Time:</strong> {item.startTime}
+            </p>
+            <p>
+              <strong>Class:</strong> {item.classType}
+            </p>
           </div>
         ))}
       </section>
