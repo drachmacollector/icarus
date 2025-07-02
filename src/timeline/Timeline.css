@@ -1,0 +1,102 @@
+/* Timeline.css */
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: radial-gradient(circle at center, #0a0a2a, #000);
+  color: #f0f0f0;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 1.4rem;
+  color: #00e1ff;
+}
+
+select {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
+  border-radius: 4px;
+  border: none;
+  background: #222;
+  color: #00e1ff;
+  cursor: pointer;
+}
+
+select:hover {
+  background-color: #333;
+}
+
+.loader {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  animation: pulse 1.5s infinite;
+}
+
+a {
+  color: #00e1ff;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.vertical-timeline-element-content {
+  background: #111 !important;
+  color: #fff !important;
+  box-shadow: 0 0 5px rgba(0, 225, 255, 0.2);
+  padding: 0.5rem !important;
+}
+
+.vertical-timeline-element-content h3 {
+  font-size: 0.95rem;
+  margin-bottom: 0.3rem;
+}
+
+.vertical-timeline-element-content p {
+  font-size: 0.75rem;
+  margin-bottom: 0.3rem;
+}
+
+/* Aurora timeline bar tweaks */
+.aurora-timeline {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding-bottom: 0.3rem;
+  padding-left: 0.5rem;
+}
+
+.aurora-bar {
+  cursor: pointer;
+  text-align: center;
+  width: 18px;
+}
+
+.aurora-bar div {
+  width: 100%;
+  border-radius: 1px;
+}
+
+.aurora-bar small {
+  font-size: 0.6rem;
+  color: #ccc;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.4;
+  }
+}
