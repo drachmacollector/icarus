@@ -29,8 +29,9 @@ body {
   margin: 0;
   font-size: 2.2rem;
   font-weight: 700;
-  background: linear-gradient(to right, #ff6b6b, #ffa502);
+  background: linear-gradient(to right, #ff0000, #ff8102);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: 0 0 15px rgba(255, 107, 107, 0.3);
   letter-spacing: 1px;
@@ -232,7 +233,7 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
+  width: 97%;
   padding: 0.8rem 1rem;
   background: rgba(15, 18, 35, 0.9);
   display: flex;
@@ -268,7 +269,7 @@ body {
 }
 
 .legend-color.major {
-  background: #ff4757;
+  background: #ff0000;
   box-shadow: 0 0 8px #ff4757;
 }
 
@@ -278,13 +279,13 @@ body {
 }
 
 .legend-color.minor {
-  background: #ffd32a;
-  box-shadow: 0 0 8px #ffd32a;
+  background: #2ed573;
+  box-shadow: 0 0 8px #2ed573;
 }
 
 .legend-color.mild {
-  background: #2ed573;
-  box-shadow: 0 0 8px #2ed573;
+  background: #ffffff;
+  box-shadow: 0 0 8px #ffffff;
 }
 
 /* Map Styling */
@@ -300,7 +301,7 @@ body {
 }
 
 .flare-marker.major {
-  background: #ff4757;
+  background: #ff0000;
   box-shadow: 0 0 15px #ff4757;
 }
 
@@ -310,13 +311,13 @@ body {
 }
 
 .flare-marker.minor {
-  background: #ffd32a;
-  box-shadow: 0 0 10px #ffd32a;
+  background: #2ed573;
+  box-shadow: 0 0 10px #2ed581;
 }
 
 .flare-marker.mild {
-  background: #2ed573;
-  box-shadow: 0 0 8px #2ed573;
+  background: #ffffff;
+  box-shadow: 0 0 8px #ffffff;
 }
 
 .flare-popup {
@@ -485,7 +486,7 @@ input:checked + .toggle-slider:before {
 }
 
 .stats-card.major {
-  border-top: 3px solid #ff4757;
+  border-top: 3px solid #ff0000;
 }
 
 .stats-card.moderate {
@@ -493,11 +494,11 @@ input:checked + .toggle-slider:before {
 }
 
 .stats-card.minor {
-  border-top: 3px solid #ffd32a;
+  border-top: 3px solid #2ed573;
 }
 
 .stats-card.mild {
-  border-top: 3px solid #2ed573;
+  border-top: 3px solid #ffffff;
 }
 
 .stats-value {
@@ -508,7 +509,7 @@ input:checked + .toggle-slider:before {
 }
 
 .stats-card.major .stats-value {
-  color: #ff4757;
+  color: #ff0000;
 }
 
 .stats-card.moderate .stats-value {
@@ -516,11 +517,11 @@ input:checked + .toggle-slider:before {
 }
 
 .stats-card.minor .stats-value {
-  color: #ffd32a;
+  color: #2ed573;
 }
 
 .stats-card.mild .stats-value {
-  color: #2ed573;
+  color: #ffffff;
 }
 
 .stats-label {
@@ -559,7 +560,7 @@ input:checked + .toggle-slider:before {
 }
 
 .flare-card.major {
-  border-left: 4px solid #ff4757;
+  border-left: 4px solid #ff0000;
 }
 
 .flare-card.moderate {
@@ -567,11 +568,11 @@ input:checked + .toggle-slider:before {
 }
 
 .flare-card.minor {
-  border-left: 4px solid #ffd32a;
+  border-left: 4px solid #2ed573;
 }
 
 .flare-card.mild {
-  border-left: 4px solid #2ed573;
+  border-left: 4px solid #ffffff;
 }
 
 .flare-card-header {
@@ -597,7 +598,7 @@ input:checked + .toggle-slider:before {
 
 .severity.major {
   background: rgba(255, 71, 87, 0.2);
-  color: #ff4757;
+  color: #ff0000;
   border: 1px solid rgba(255, 71, 87, 0.4);
 }
 
@@ -608,15 +609,15 @@ input:checked + .toggle-slider:before {
 }
 
 .severity.minor {
-  background: rgba(255, 211, 42, 0.2);
-  color: #ffd32a;
-  border: 1px solid rgba(255, 211, 42, 0.4);
+  background: rgba(46, 213, 116, 0.2);
+  color: #2ed573;
+  border: 1px solid rgba(46, 213, 116, 0.4);
 }
 
 .severity.mild {
   background: rgba(46, 213, 115, 0.2);
-  color: #2ed573;
-  border: 1px solid rgba(46, 213, 115, 0.4);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .flare-details {
@@ -649,11 +650,11 @@ input:checked + .toggle-slider:before {
   border-radius: 6px;
   font-size: 0.9rem;
   color: #a0b2ff;
-  border-left: 3px solid #ffa502;
+  border-left: 3px solid #02ffee;
 }
 
 .instruments-label {
   font-weight: 600;
   margin-right: 0.5rem;
-  color: #ffa502;
+  color: #02ffee;
 }

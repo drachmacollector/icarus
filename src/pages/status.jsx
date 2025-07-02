@@ -105,48 +105,47 @@ export default function StatusPage() {
       <div className="header-section">
         <div className="title-container">
           <h2 className="status-title">Solar Flare Command Center</h2>
-          <div className="title-decoration"></div>
         </div>
       </div>
 
-<div className="date-range-controls">
-  <div className="notification-area">
-    {loading && <div className="loading-notification">Loading flare data...</div>}
-    {error && <div className="error-notification">{error}</div>}
-  </div>
-  
-  <div className="controls-right">
-    <div className="date-picker-group">
-      <div className="date-label">Start Date</div>
-      <DatePicker
-        selected={startDate}
-        onChange={setStartDate}
-        dateFormat="yyyy-MM-dd"
-        maxDate={new Date()}
-        minDate={new Date("2010-01-01")}
-        placeholderText="Start Date"
-        className="datepicker"
-      />
-    </div>
-    
-    <div className="date-picker-group">
-      <label className="date-label">End Date</label>
-      <DatePicker
-        selected={endDate}
-        onChange={setEndDate}
-        dateFormat="yyyy-MM-dd"
-        maxDate={new Date()}
-        minDate={startDate || new Date("2010-01-01")}
-        placeholderText="End Date"
-        className="datepicker"
-      />
-    </div>
-    
-    <button className="reset-btn" onClick={resetDateRange}>
-      Reset Range
-    </button>
-  </div>
-</div>
+        <div className="date-range-controls">
+          <div className="notification-area">
+            {loading && <div className="loading-notification">Loading flare data...</div>}
+            {error && <div className="error-notification">{error}</div>}
+          </div>
+          
+          <div className="controls-right">
+            <div className="date-picker-group">
+              <div className="date-label">Start Date</div>
+              <DatePicker
+                selected={startDate}
+                onChange={setStartDate}
+                dateFormat="yyyy-MM-dd"
+                maxDate={new Date()}
+                minDate={new Date("2010-01-01")}
+                placeholderText="Start Date"
+                className="datepicker"
+              />
+            </div>
+            
+            <div className="date-picker-group">
+              <label className="date-label">End Date</label>
+              <DatePicker
+                selected={endDate}
+                onChange={setEndDate}
+                dateFormat="yyyy-MM-dd"
+                maxDate={new Date()}
+                minDate={startDate || new Date("2010-01-01")}
+                placeholderText="End Date"
+                className="datepicker"
+              />
+            </div>
+            
+            <button className="reset-btn" onClick={resetDateRange}>
+              Reset Range
+            </button>
+          </div>
+        </div>
 
       <div className="map-layout">
         <div className="map-wrapper">
