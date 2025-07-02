@@ -4,7 +4,9 @@ import Globe from 'react-globe.gl';
 import * as THREE from 'three';
 import { computeSubsolarPoint } from '../utils/geoUtils';
 import HeatMapDashboard from '../../HeatMap/components/HeatMapDashboard';
-import CmeTracker from '../../CME/components/CmeTracker'; // ✅ Import your CME Tracker component
+import CmeTracker from '../../CME/components/CmeTracker';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 export default function GlobeVisualizer({
   flares,
@@ -18,6 +20,7 @@ export default function GlobeVisualizer({
   const [hemisphereOpacity, setHemisphereOpacity] = useState(0.75);
   const [autoRotate, setAutoRotate] = useState(true);
   const [showMode, setShowMode] = useState('flares'); // 'flares', 'heatmap', 'cme'
+  const [selectedDate, setSelectedDate] = useState(null);
 
   const rgbMap = {
     green: '0,255,0',
@@ -73,7 +76,17 @@ export default function GlobeVisualizer({
     hemiMeshRef.current.material.needsUpdate = true;
   }, [currentTime, flares]);
 
-  const flarePoints = flares.map(f => ({
+  const selectedDateStr = selectedDate ? selectedDate.toISOString().slice(0, 10) : null;
+
+  const filteredFlares = selectedDateStr
+    ? flares.filter(f => f.peakTime?.slice(0, 10) === selectedDateStr)
+    : flares;
+
+  const filteredHeatmap = selectedDateStr
+    ? heatmapData.filter(d => d.date?.slice(0, 10) === selectedDateStr)
+    : heatmapData;
+
+  const flarePoints = filteredFlares.map(f => ({
     lat: f.lat,
     lng: f.lng,
     size: f.size || 0.3,
@@ -81,7 +94,7 @@ export default function GlobeVisualizer({
     flare: f
   }));
 
-  const flareArcs = flares.map(f => ({
+  const flareArcs = filteredFlares.map(f => ({
     startLat: f.lat,
     startLng: f.lng,
     endLat: f.lat + 15,
@@ -90,7 +103,7 @@ export default function GlobeVisualizer({
     flare: f
   }));
 
-  const heatPoints = heatmapData.map(d => {
+  const heatPoints = filteredHeatmap.map(d => {
     const intensity = Math.max(0, Math.min(1, d.intensity ?? 0));
     let color = 'green';
     if (intensity > 0.75) color = 'red';
@@ -107,6 +120,33 @@ export default function GlobeVisualizer({
 
   return (
     <div style={{ position: 'relative', height: '100%', width: '100%' }}>
+      {/* === DATE PICKER === */}
+      {/* === DATE PICKER (only for flares) === */}
+{showMode === 'flares' && (
+  <div style={{
+    position: 'absolute',
+    top: '1rem',
+    left: '1rem',
+    zIndex: 1000,
+    background: 'rgba(0,0,0,0.6)',
+    padding: '0.5rem 1rem',
+    borderRadius: '12px',
+    color: '#fff',
+    fontSize: '0.9rem',
+    backdropFilter: 'blur(8px)'
+  }}>
+    <label style={{ marginRight: '0.5rem' }}>📅 Filter by date:</label>
+    <DatePicker
+      selected={selectedDate}
+      onChange={setSelectedDate}
+      dateFormat="yyyy-MM-dd"
+      isClearable
+      placeholderText="Select date"
+    />
+  </div>
+)}
+
+
       {/* === FLARE GLOBE === */}
       {showMode === 'flares' && (
         <Globe
@@ -172,9 +212,9 @@ export default function GlobeVisualizer({
         />
       )}
 
-      {/* === CME GLOBE (imported component) === */}
+      {/* === CME GLOBE === */}
       {showMode === 'cme' && (
-        <CmeTracker />
+        <CmeTracker selectedDate={selectedDateStr} />
       )}
 
       {/* === CONTROL BUTTONS === */}
