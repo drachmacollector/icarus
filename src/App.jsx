@@ -7,21 +7,16 @@ import Navbar from "./Navbar";
 import RiskPage from "./Solar Flare/pages/risk";
 import StatusPage from "./Solar Flare/pages/status";
 import CmeTracker from './CME/components/CmeTracker';
-import Home from './home/Home'; 
+import News from './news/News'; 
 import AuroraForecast from './Aurora/components/AuroraForecast';
 import HeatMapGlobe from './HeatMap/components/HeatMapGlobe';
 import HeatMapDashboard from './HeatMap/components/HeatMapDashboard';
-
-import Timeline from "./timeline/Timeline";
-
-
 
 import './App.css'; // 
 
 export default function App() {
   const { flares, loading, error, refresh } = useFlareData();
-  const [currentTime] = useState(new Date());
-  // const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   return (
     <Router>
@@ -49,10 +44,9 @@ export default function App() {
           <Route path="/status" element={<StatusPage flares={flares} />} />
           <Route path="/risk" element={<RiskPage />} />
           <Route path="/CmeTracker" element={<CmeTracker />} />
-           <Route path="/home" element={<Home />} />
+           <Route path="/News" element={<News />} />
           <Route path="/AuroraForecast" element={<AuroraForecast />} />
           <Route path="/HeatMapDashboard" element={<HeatMapDashboard />} />
-          <Route path="/timeline" element={<Timeline />} />
         </Routes>
       </div>
     </Router>

@@ -1,7 +1,7 @@
 // src/pages/News.jsx
 import { useEffect, useState } from "react";
 import axios from "axios";
-import "./Home.css";
+import "./News.css";
 // import EarthGlobe from "../components/EarthGlobe";
 
 const SPACE_NEWS_API = "https://api.spaceflightnewsapi.net/v4/articles/?limit=50";
@@ -114,6 +114,35 @@ const News = () => {
           </div>
         </>
       )}
+      {/* ✅ Styled Home Button - Bottom Left with Glass Effect */}
+<a href="/" style={{ position: 'fixed', bottom: '1rem', left: '1rem', zIndex: 1000, textDecoration: 'none' }}>
+  <button style={{
+    padding: '0.6rem 1.2rem',
+    background: 'rgba(255, 255, 255, 0.1)',
+    color: '#fff',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    backdropFilter: 'blur(10px)',
+    WebkitBackdropFilter: 'blur(10px)',
+    borderRadius: '12px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    fontWeight: '600',
+    fontSize: '1rem'
+  }}
+    onMouseOver={e => {
+      e.currentTarget.style.background = 'rgba(0, 122, 204, 0.6)';
+      e.currentTarget.style.transform = 'scale(1.05)';
+    }}
+    onMouseOut={e => {
+      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+      e.currentTarget.style.transform = 'scale(1)';
+    }}
+  >
+    🌞 Flares
+  </button>
+</a>
+
     </div>
   );
 };

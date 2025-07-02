@@ -22,7 +22,7 @@ export default function Navbar() {
     </div>
     <nav className="navbar">
       <div className="navbar-links">
-        <Link to="/home" className={`nav-link ${location.pathname === "/home" ? "active" : ""}`}>News</Link>
+        <Link to="/News" className={`nav-link ${location.pathname === "/News" ? "active" : ""}`}>News</Link>
         <Link
           to="/AuroraForecast"
           className={`nav-link ${location.pathname === "/risk" ? "active" : ""}`}
@@ -41,12 +41,6 @@ export default function Navbar() {
           className={`nav-link ${location.pathname === "/status" ? "active" : ""}`}
         >
           🗺️ Status Map
-        </Link>
-        <Link
-          to="/Timeline"
-          className={`nav-link ${location.pathname === "/Timeline" ? "active" : ""}`}
-        >
-          Timeline
         </Link>
       </div>
     </nav>
