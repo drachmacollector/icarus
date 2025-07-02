@@ -54,14 +54,14 @@ const News = () => {
   const totalPages = Math.ceil(filteredArticles.length / articlesPerPage);
 
   return (
-    <div className="news-container">
+    <div className="news-container-news">
       <div className="news-header">
         <div className="header-content">
           <h1>🪐 Cosmic Chronicle</h1>
           <p>Latest discoveries, missions, and breakthroughs in space exploration</p>
         </div>
         <div className="search-section">
-          <div className="search-container">
+          <div className="search-container-news">
             <input
               type="text"
               placeholder="Search space news..."
@@ -80,7 +80,7 @@ const News = () => {
       </div>
 
       {loading ? (
-        <div className="loading-container">
+        <div className="loading-container-news">
           <div className="loading-spinner"></div>
           <p>Loading cosmic headlines...</p>
         </div>

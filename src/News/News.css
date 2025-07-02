@@ -9,8 +9,8 @@ body {
   overflow-x: hidden;
 }
 
-/* Main Container */
-.news-container {
+/* Main container-news */
+.news-container-news {
   max-width: 1400px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
@@ -51,7 +51,7 @@ body {
   gap: 1.5rem;
 }
 
-.search-container {
+.search-container-news {
   position: relative;
 }
 
@@ -119,7 +119,7 @@ body {
 }
 
 /* Loading State */
-.loading-container {
+.loading-container-news {
   display: flex;
   flex-direction: column;
   align-items: center;
