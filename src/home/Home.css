@@ -1,0 +1,52 @@
+/* src/home/Home.css */
+
+.home-container {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background-color: #121212;
+  color: #f0f0f0;
+}
+
+h1, h2 {
+  color: #00c2ff;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+section {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background-color: #1f1f1f;
+  border-radius: 10px;
+  box-shadow: 0 0 8px rgba(0, 194, 255, 0.2);
+}
+
+.card {
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.1);
+}
+
+.card p {
+  margin: 0.4rem 0;
+  line-height: 1.5;
+}
+
+.no-data {
+  text-align: center;
+  color: #aaaaaa;
+  font-style: italic;
+}
+
+@media screen and (max-width: 600px) {
+  .home-container {
+    padding: 1rem;
+  }
+
+  section {
+    padding: 0.8rem;
+  }
+}

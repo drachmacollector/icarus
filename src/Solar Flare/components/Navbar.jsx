@@ -56,6 +56,7 @@ export default function Navbar() {
         >
           🗺️ Status Map
         </Link>
+         <Link to="/home" className={`nav-link ${location.pathname === "/home" ? "active" : ""}`}>Home(News))</Link>
         
         
       </div>
