@@ -15,15 +15,7 @@ export default function Navbar() {
 
   return (
     <>
-        <div className="legend" style={{
-      position: 'absolute',
-      top: '1rem',
-      left: '1rem',
-      padding: '0.5rem 1rem',
-      borderRadius: '4px',
-      fontSize: '0.9rem',
-      zIndex: 10
-    }}>
+        <div className="legend" >
       <div><span style={dotStyle('red')}></span>X‑Class: Widespread Blackout</div>
       <div><span style={dotStyle('yellow')}></span>M‑Class: Localized Fades</div>
       <div><span style={dotStyle('green')}></span>No Severe Flare</div>
