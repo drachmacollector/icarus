@@ -1,7 +1,7 @@
 // src/pages/News.jsx
 import { useEffect, useState } from "react";
 import axios from "axios";
-import "./Home.css";
+import "./News.css";
 // import EarthGlobe from "../components/EarthGlobe";
 
 const SPACE_NEWS_API = "https://api.spaceflightnewsapi.net/v4/articles/?limit=50";
