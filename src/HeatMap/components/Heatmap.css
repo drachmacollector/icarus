@@ -168,13 +168,13 @@
   background: rgba(100, 200, 255, 0.1);
 }
 
-.info-section {
+.info-section-heatmap {
   margin-bottom: 0.8rem;
   padding-bottom: 0.8rem;
   border-bottom: 1px solid rgba(100, 200, 255, 0.08);
 }
 
-.info-section:last-child {
+.info-section-heatmap:last-child {
   margin-bottom: 0;
   padding-bottom: 0;
   border-bottom: none;

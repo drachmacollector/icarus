@@ -1,32 +1,25 @@
-// src/aurora/components/AuroraTimeline.jsx
 import React from 'react';
+import './AuroraForecast.css';
 
 export default function AuroraTimeline({ kpForecast, onSelectHour }) {
   return (
-    <div className="aurora-timeline" style={{ display:'flex', gap:8 }}>
+    <div className="aurora-timeline">
       {kpForecast.map((entry, i) => {
         const height = (entry.kp / 9) * 100;
         const alert = entry.kp >= 5;
+        const hour = new Date(entry.timeTag).getUTCHours();
+        
         return (
           <div
             key={i}
+            className={`timeline-bar ${alert ? 'alert' : ''}`}
             onClick={() => onSelectHour(entry)}
-            style={{
-              cursor: 'pointer',
-              textAlign: 'center',
-              width: 30
-            }}
           >
             <div 
-              style={{
-                height: `${height}%`,
-                background: alert ? '#7fffd4' : '#005f73',
-                transition: 'background 0.5s'
-              }}
+              className="bar-fill"
+              style={{ height: `${height}%` }}
             />
-            <small style={{ color:'#eee' }}>
-              {new Date(entry.timeTag).getUTCHours()}h
-            </small>
+            <div className="bar-label">{hour}h</div>
           </div>
         );
       })}

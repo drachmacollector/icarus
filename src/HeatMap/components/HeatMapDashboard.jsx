@@ -120,7 +120,7 @@ export default function HeatMapDashboard() {
           </button>
         </div>
         
-        <div className="info-section">
+        <div className="info-section-heatmap">
           <div className="info-title">
             <div className="color-indicator red"></div>
             <h4>Clusters of Activity</h4>
@@ -128,7 +128,7 @@ export default function HeatMapDashboard() {
           <p>Red peaks show solar flares + CMEs originating within a few degrees.</p>
         </div>
         
-        <div className="info-section">
+        <div className="info-section-heatmap">
           <div className="info-title">
             <div className="color-indicator blue"></div>
             <h4>Bandwidth</h4>
@@ -136,7 +136,7 @@ export default function HeatMapDashboard() {
           <p>~2.5° kernel reveals hotspots without washing out detail.</p>
         </div>
         
-        <div className="info-section">
+        <div className="info-section-heatmap">
           <div className="info-title">
             <div className="color-indicator green"></div>
             <h4>3D Hills</h4>
