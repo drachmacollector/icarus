@@ -15,11 +15,6 @@ export default function Navbar() {
 
   return (
     <>
-        <div className="legend" >
-      <div><span style={dotStyle('red')}></span>X‑Class: Widespread Blackout</div>
-      <div><span style={dotStyle('yellow')}></span>M‑Class: Localized Fades</div>
-      <div><span style={dotStyle('green')}></span>No Severe Flare</div>
-    </div>
     <nav className="navbar">
       <div className="navbar-links">
         <Link to="/News" className={`nav-link ${location.pathname === "/News" ? "active" : ""}`}>News</Link>
