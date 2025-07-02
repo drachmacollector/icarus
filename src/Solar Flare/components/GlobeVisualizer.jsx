@@ -1,4 +1,7 @@
+// src/Solar Flare/components/GlobeVisualizer.jsx
+
 import React, { useEffect, useRef, useState } from 'react';
+import { Link, useLocation } from "react-router-dom";
 import Globe from 'react-globe.gl';
 import * as THREE from 'three';
 import DatePicker from 'react-datepicker';
@@ -133,6 +136,7 @@ export default function GlobeVisualizer({
   });
 
   return (
+    <>
     <div style={{ position: 'relative', height: '100%', width: '100%' }}>
       {showMode === 'flares' && (
         <div className="controls-container">
@@ -187,14 +191,15 @@ export default function GlobeVisualizer({
             <label>☀️ Filter by flare class:</label>
             <select value={selectedClass} onChange={e => setSelectedClass(e.target.value)}>
               <option value="All">All</option>
-              <option value="X">X (Extreme)</option>
+              <option value="X">X (Major)</option>
               <option value="M">M (Moderate)</option>
               <option value="C">C (Minor)</option>
+              <option value="C">B (Mild)</option>
             </select>
           </div>
         </div>
+        
       )}
-
       {showMode === 'flares' && (
         <Globe
           ref={globeEl}
@@ -267,16 +272,14 @@ export default function GlobeVisualizer({
             {autoRotate ? '⏸ Pause Rotation' : '▶ Resume Rotation'}
           </button>
         )}
-        <button onClick={() => setShowMode('flares')} className="control-button">🌞 Flares</button>
-        <button onClick={() => setShowMode('heatmap')} className="control-button">🔥 Heatmap</button>
-        <button onClick={() => setShowMode('cme')} className="control-button">☄️ CME</button>
+              <Link
+                to="/status"
+                className={`nav-link ${location.pathname === "/status" ? "active" : ""}`}
+              >
+                🗺️ Status Map
+              </Link>
       </div>
-
-      {showMode === 'heatmap' && (
-        <div style={{ position: 'absolute', bottom: 0, width: '100%', zIndex: 500 }}>
-          <HeatMapDashboard />
-        </div>
-      )}
     </div>
+    </>
   );
 }
