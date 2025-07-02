@@ -21,7 +21,7 @@ export default function HeatMapGlobe({ points }) {
           points && points.length
             ? [{ 
                 points,
-                bandwidth: 4, 
+                bandwidth: 2.5, 
                 weight: d => d.weight,
                 lat:    d => d.lat,
                 lng:    d => d.lng,
