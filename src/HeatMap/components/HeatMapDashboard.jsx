@@ -1,5 +1,4 @@
-// src/HeatMap/components/HeatMapDashboard.jsx
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import useFlareData from '../../Solar Flare/hooks/useFlareData';
@@ -12,10 +11,12 @@ export default function HeatMapDashboard() {
   // Date range state
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-
+  
   // Toggles
   const [showFlares, setShowFlares] = useState(true);
   const [showCmes, setShowCmes] = useState(true);
+  const [showInfo, setShowInfo] = useState(true);
+  const infoPanelRef = useRef(null);
 
   // Load raw data
   const { flares } = useFlareData({
@@ -34,26 +35,28 @@ export default function HeatMapDashboard() {
     return buildHeatmapPoints(f, c);
   }, [flares, cmes, showFlares, showCmes]);
 
-  return (
-    <div style={{ height: '100vh', width: '100%', position: 'relative' }}>
-      {/* === Heatmap Controls Overlay === */}
-      <div style={{
-        position: 'absolute',
-        top: '1rem',
-        left: '1rem',
-        zIndex: 1000,
-        background: 'rgba(0,0,0,0.65)',
-        padding: '1rem',
-        borderRadius: '12px',
-        color: '#fff',
-        width: '250px',
-        fontSize: '0.9rem',
-        backdropFilter: 'blur(6px)'
-      }}>
-        <h3 style={{ marginTop: 0, marginBottom: '1rem' }}>Heatmap Controls</h3>
+  // Handle info panel animation
+  useEffect(() => {
+    if (showInfo) {
+      infoPanelRef.current.style.transform = 'translateX(0)';
+      infoPanelRef.current.style.opacity = '1';
+    } else {
+      infoPanelRef.current.style.transform = 'translateX(100%)';
+      infoPanelRef.current.style.opacity = '0';
+    }
+  }, [showInfo]);
 
-        <div style={{ marginBottom: 12 }}>
-          <label>Start Date:</label><br />
+  return (
+    <div className="heatmap-dashboard">
+      {/* === Heatmap Controls Overlay === */}
+      <div className="heatmap-controls">
+        <div className="controls-header">
+          <h3>Heatmap Controls</h3>
+
+        </div>
+
+        <div className="control-group">
+          <label>Start Date</label>
           <DatePicker
             selected={startDate}
             onChange={setStartDate}
@@ -64,8 +67,8 @@ export default function HeatMapDashboard() {
           />
         </div>
 
-        <div style={{ marginBottom: 12 }}>
-          <label>End Date:</label><br />
+        <div className="control-group">
+          <label>End Date</label>
           <DatePicker
             selected={endDate}
             onChange={setEndDate}
@@ -76,28 +79,69 @@ export default function HeatMapDashboard() {
           />
         </div>
 
-        <div style={{ marginBottom: 12 }}>
-          <input
-            type="checkbox"
-            checked={showFlares}
-            onChange={() => setShowFlares(v => !v)}
-            id="flr"
-          />
-          <label htmlFor="flr" style={{ marginLeft: 6 }}>Show Solar Flares ({flares.length})</label>
+        <div className="control-group">
+          <div className="checkbox-group">
+            <input
+              type="checkbox"
+              checked={showFlares}
+              onChange={() => setShowFlares(v => !v)}
+              id="flr"
+            />
+            <label htmlFor="flr">Show Solar Flares ({flares.length})</label>
+          </div>
         </div>
 
-        <div style={{ marginBottom: 12 }}>
-          <input
-            type="checkbox"
-            checked={showCmes}
-            onChange={() => setShowCmes(v => !v)}
-            id="cme"
-          />
-          <label htmlFor="cme" style={{ marginLeft: 6 }}>Show CMEs ({cmes.length})</label>
+        <div className="control-group">
+          <div className="checkbox-group">
+            <input
+              type="checkbox"
+              checked={showCmes}
+              onChange={() => setShowCmes(v => !v)}
+              id="cme"
+            />
+            <label htmlFor="cme">Show CMEs ({cmes.length})</label>
+          </div>
         </div>
 
-        <div style={{ marginTop: 16 }}>
+        <div className="stats">
           <strong>Total points:</strong> {points.length}
+        </div>
+      </div>
+
+      {/* === Information Panel - Made smaller and more subtle === */}
+      <div className="heatmap-info-panel" ref={infoPanelRef}>
+        <div className="info-header">
+          <h3>Understanding the Heatmap</h3>
+          <button 
+            className="close-info"
+            onClick={() => setShowInfo(false)}
+          >
+            ×
+          </button>
+        </div>
+        
+        <div className="info-section">
+          <div className="info-title">
+            <div className="color-indicator red"></div>
+            <h4>Clusters of Activity</h4>
+          </div>
+          <p>Red peaks show solar flares + CMEs originating within a few degrees.</p>
+        </div>
+        
+        <div className="info-section">
+          <div className="info-title">
+            <div className="color-indicator blue"></div>
+            <h4>Bandwidth</h4>
+          </div>
+          <p>~2.5° kernel reveals hotspots without washing out detail.</p>
+        </div>
+        
+        <div className="info-section">
+          <div className="info-title">
+            <div className="color-indicator green"></div>
+            <h4>3D Hills</h4>
+          </div>
+          <p>Altitudes show where solar activity concentrates for quick spotting of trouble zones.</p>
         </div>
       </div>
 
