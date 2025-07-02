@@ -35,7 +35,7 @@ export default function HeatMapDashboard() {
 
   return (
     <div style={{ display:'flex', height:'100vh' }}>
-      <aside style={{
+      {/* <aside style={{
         width: 250, padding: 16, background:'#111', color:'#eee', overflowY:'auto'
       }}>
         <h3>Heatmap Controls</h3>
@@ -85,7 +85,7 @@ export default function HeatMapDashboard() {
         <div style={{ marginTop:20 }}>
           <strong>Total points:</strong> {points.length}
         </div>
-      </aside>
+      </aside> */}
 
       <main style={{ flex:'1 1 auto', position:'relative' }}>
         <HeatMapGlobe points={points} />
