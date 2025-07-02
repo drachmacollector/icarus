@@ -42,6 +42,12 @@ export default function Navbar() {
         >
           🗺️ Status Map
         </Link>
+        <Link
+          to="/Timeline"
+          className={`nav-link ${location.pathname === "/Timeline" ? "active" : ""}`}
+        >
+          Timeline
+        </Link>
       </div>
     </nav>
     </>

@@ -12,11 +12,16 @@ import AuroraForecast from './Aurora/components/AuroraForecast';
 import HeatMapGlobe from './HeatMap/components/HeatMapGlobe';
 import HeatMapDashboard from './HeatMap/components/HeatMapDashboard';
 
+import Timeline from "./timeline/Timeline";
+
+
+
 import './App.css'; // 
 
 export default function App() {
   const { flares, loading, error, refresh } = useFlareData();
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentTime] = useState(new Date());
+  // const [currentTime, setCurrentTime] = useState(new Date());
 
   return (
     <Router>
@@ -47,6 +52,7 @@ export default function App() {
            <Route path="/home" element={<Home />} />
           <Route path="/AuroraForecast" element={<AuroraForecast />} />
           <Route path="/HeatMapDashboard" element={<HeatMapDashboard />} />
+          <Route path="/timeline" element={<Timeline />} />
         </Routes>
       </div>
     </Router>
