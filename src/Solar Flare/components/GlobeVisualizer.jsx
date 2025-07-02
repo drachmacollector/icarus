@@ -1,12 +1,13 @@
-// src/components/GlobeVisualizer.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import Globe from 'react-globe.gl';
 import * as THREE from 'three';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import { computeSubsolarPoint } from '../utils/geoUtils';
 import HeatMapDashboard from '../../HeatMap/components/HeatMapDashboard';
 import CmeTracker from '../../CME/components/CmeTracker';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import './Globe.css';
+
 
 export default function GlobeVisualizer({
   flares,
@@ -19,8 +20,12 @@ export default function GlobeVisualizer({
   const [hemisphereRGB, setHemisphereRGB] = useState('navy');
   const [hemisphereOpacity, setHemisphereOpacity] = useState(0.75);
   const [autoRotate, setAutoRotate] = useState(true);
-  const [showMode, setShowMode] = useState('flares'); // 'flares', 'heatmap', 'cme'
+  const [showMode, setShowMode] = useState('flares');
+
   const [selectedDate, setSelectedDate] = useState(null);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [selectedClass, setSelectedClass] = useState('All');
 
   const rgbMap = {
     green: '0,255,0',
@@ -78,19 +83,20 @@ export default function GlobeVisualizer({
 
   const selectedDateStr = selectedDate ? selectedDate.toISOString().slice(0, 10) : null;
 
-  const filteredFlares = selectedDateStr
-    ? flares.filter(f => f.peakTime?.slice(0, 10) === selectedDateStr)
-    : flares;
-
-  const filteredHeatmap = selectedDateStr
-    ? heatmapData.filter(d => d.date?.slice(0, 10) === selectedDateStr)
-    : heatmapData;
+  const filteredFlares = flares.filter(f => {
+    const flareDate = new Date(f.peakTime);
+    if (selectedDate && f.peakTime.slice(0, 10) !== selectedDateStr) return false;
+    if (startDate && flareDate < startDate) return false;
+    if (endDate && flareDate > endDate) return false;
+    if (selectedClass !== 'All' && f.classType !== selectedClass) return false;
+    return true;
+  });
 
   const flarePoints = filteredFlares.map(f => ({
     lat: f.lat,
     lng: f.lng,
     size: f.size || 0.3,
-    color: f.color || 'orange',
+    color: f.classType === 'X' ? 'red' : f.classType === 'M' ? 'orange' : 'green',
     flare: f
   }));
 
@@ -102,6 +108,14 @@ export default function GlobeVisualizer({
     color: f.classType === 'X' ? ['red'] : ['orange'],
     flare: f
   }));
+
+  const filteredHeatmap = heatmapData.filter(d => {
+    const dataDate = new Date(d.date);
+    if (selectedDate && d.date.slice(0, 10) !== selectedDateStr) return false;
+    if (startDate && dataDate < startDate) return false;
+    if (endDate && dataDate > endDate) return false;
+    return true;
+  });
 
   const heatPoints = filteredHeatmap.map(d => {
     const intensity = Math.max(0, Math.min(1, d.intensity ?? 0));
@@ -120,40 +134,73 @@ export default function GlobeVisualizer({
 
   return (
     <div style={{ position: 'relative', height: '100%', width: '100%' }}>
-      {/* === DATE PICKER === */}
-      {/* === DATE PICKER (only for flares) === */}
-{showMode === 'flares' && (
-  <div style={{
-    position: 'absolute',
-    top: '1rem',
-    left: '1rem',
-    zIndex: 1000,
-    background: 'rgba(0,0,0,0.6)',
-    padding: '0.5rem 1rem',
-    borderRadius: '12px',
-    color: '#fff',
-    fontSize: '0.9rem',
-    backdropFilter: 'blur(8px)'
-  }}>
-    <label style={{ marginRight: '0.5rem' }}>📅 Filter by date:</label>
-    <DatePicker
-      selected={selectedDate}
-      onChange={setSelectedDate}
-      dateFormat="yyyy-MM-dd"
-      isClearable
-      placeholderText="Select date"
-    />
-  </div>
-)}
+      {showMode === 'flares' && (
+        <div className="controls-container">
+          <div>
+            <label>📅 Filter by exact date:</label>
+            <DatePicker
+              color="black"
+              className="datepicker-input"
+              style={{ width: '100%' }}
+              selected={selectedDate}
+              onChange={setSelectedDate}
+              dateFormat="yyyy-MM-dd"
+              isClearable
+              placeholderText="Select date"
+              maxDate={new Date()}
+            />
+          </div>
 
+          <div>
+            <label>⏱ Filter by date range:</label>
+            <DatePicker
+              className="datepicker-input"
+              style={{ width: '100%' }}
+              color="black"
+              selectsRange
+              selected={startDate}
+              onChange={setStartDate}
+              selectsStart
+              startDate={startDate}
+              endDate={endDate}
+              dateFormat="yyyy-MM-dd"
+              placeholderText="Start date"
+              maxDate={new Date()}
+            />
+            <DatePicker
+            className="datepicker-input"
+              style={{ width: '100%' }}
+              color="black"
+              selectsRange
+              selected={endDate}
+              onChange={setEndDate}
+              selectsEnd
+              startDate={startDate}
+              endDate={endDate}
+              dateFormat="yyyy-MM-dd"
+              placeholderText="End date"
+              maxDate={new Date()}
+            />
+          </div>
 
-      {/* === FLARE GLOBE === */}
+          <div>
+            <label>☀️ Filter by flare class:</label>
+            <select value={selectedClass} onChange={e => setSelectedClass(e.target.value)}>
+              <option value="All">All</option>
+              <option value="X">X (Extreme)</option>
+              <option value="M">M (Moderate)</option>
+              <option value="C">C (Minor)</option>
+            </select>
+          </div>
+        </div>
+      )}
+
       {showMode === 'flares' && (
         <Globe
           ref={globeEl}
           globeImageUrl="https://unpkg.com/three-globe/example/img/earth-night.jpg"
           backgroundImageUrl="https://unpkg.com/three-globe/example/img/night-sky.png"
-          showAtmosphere={true}
+          showAtmosphere
           atmosphereColor="blue"
           atmosphereAltitude={0.25}
           backgroundColor="#000000"
@@ -192,16 +239,14 @@ export default function GlobeVisualizer({
         />
       )}
 
-      {/* === HEATMAP GLOBE === */}
       {showMode === 'heatmap' && (
         <Globe
           globeImageUrl="https://unpkg.com/three-globe/example/img/earth-night.jpg"
           backgroundImageUrl="https://unpkg.com/three-globe/example/img/night-sky.png"
-          showAtmosphere={true}
+          showAtmosphere
           atmosphereColor="blue"
           atmosphereAltitude={0.25}
           backgroundColor="#000000"
-
           labelsData={heatPoints}
           labelLat="lat"
           labelLng="lng"
@@ -212,32 +257,21 @@ export default function GlobeVisualizer({
         />
       )}
 
-      {/* === CME GLOBE === */}
       {showMode === 'cme' && (
         <CmeTracker selectedDate={selectedDateStr} />
       )}
 
-      {/* === CONTROL BUTTONS === */}
-      <div style={{
-        position: 'absolute',
-        top: '1rem',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        zIndex: 1000,
-        display: 'flex',
-        gap: '1rem'
-      }}>
+      <div className="top-buttons">
         {showMode === 'flares' && (
-          <button onClick={() => setAutoRotate(prev => !prev)} style={buttonStyle}>
+          <button onClick={() => setAutoRotate(prev => !prev)} className="control-button">
             {autoRotate ? '⏸ Pause Rotation' : '▶ Resume Rotation'}
           </button>
         )}
-        <button onClick={() => setShowMode('flares')} style={buttonStyle}>🌞 Flares</button>
-        <button onClick={() => setShowMode('heatmap')} style={buttonStyle}>🔥 Heatmap</button>
-        <button onClick={() => setShowMode('cme')} style={buttonStyle}>☄️ CME</button>
+        <button onClick={() => setShowMode('flares')} className="control-button">🌞 Flares</button>
+        <button onClick={() => setShowMode('heatmap')} className="control-button">🔥 Heatmap</button>
+        <button onClick={() => setShowMode('cme')} className="control-button">☄️ CME</button>
       </div>
 
-      {/* === HEATMAP DASHBOARD === */}
       {showMode === 'heatmap' && (
         <div style={{ position: 'absolute', bottom: 0, width: '100%', zIndex: 500 }}>
           <HeatMapDashboard />
@@ -246,18 +280,3 @@ export default function GlobeVisualizer({
     </div>
   );
 }
-
-const buttonStyle = {
-  padding: '0.5rem 1.5rem',
-  fontSize: '1rem',
-  fontWeight: 'bold',
-  color: '#fff',
-  background: 'rgba(255, 255, 255, 0.1)',
-  border: '1px solid rgba(255, 255, 255, 0.2)',
-  borderRadius: '12px',
-  backdropFilter: 'blur(8px)',
-  WebkitBackdropFilter: 'blur(8px)',
-  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
-  cursor: 'pointer',
-  transition: 'all 0.3s ease'
-};
