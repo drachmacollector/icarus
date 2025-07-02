@@ -1,6 +1,6 @@
 // src/cme/api/cmeApi.js
 import axios from 'axios';
-import { defaultStartDateUTC, defaultEndDateUTC } from '../../utils/timeUtils';
+import { defaultStartDateUTC, defaultEndDateUTC } from '../../Solar Flare/utils/timeUtils';
 
 const BASE = 'https://api.nasa.gov/DONKI/CME';
 const API_KEY = 'fM6bs5qLVnqzn6z2GUIDXpdps8ZE3AhMAkC43EVa'; // or move to env
