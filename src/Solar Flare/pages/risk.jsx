@@ -42,7 +42,7 @@ export default function RiskPage() {
       e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
     }}
   >
-    🏠 Home
+    🌞 Flares
   </button>
 </Link>
 
