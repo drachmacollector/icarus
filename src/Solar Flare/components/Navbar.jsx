@@ -37,6 +37,12 @@ export default function Navbar() {
         >
           🚨 CME
         </Link>
+        <Link
+          to="/AuroraForecast"
+          className={`nav-link ${location.pathname === "/risk" ? "active" : ""}`}
+        >
+          🚨 Aurora
+        </Link>
 
         <Link
           to="/risk"

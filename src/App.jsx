@@ -7,6 +7,7 @@ import Navbar from "./Solar Flare/components/Navbar";
 import RiskPage from "./Solar Flare/pages/risk";
 import StatusPage from "./Solar Flare/pages/status";
 import CmeTracker from './CME/components/CmeTracker';
+import AuroraForecast from './Aurora/components/AuroraForecast';
 
 import './App.css'; // 
 
@@ -40,6 +41,7 @@ export default function App() {
           <Route path="/status" element={<StatusPage flares={flares} />} />
           <Route path="/risk" element={<RiskPage />} />
           <Route path="/CmeTracker" element={<CmeTracker />} />
+          <Route path="/AuroraForecast" element={<AuroraForecast />} />
         </Routes>
       </div>
     </Router>
