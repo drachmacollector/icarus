@@ -111,11 +111,11 @@ export default function CmeTracker() {
             <p>
               <strong>Impact:</strong>{' '}
               {cme.analysis.speed > 1000 ? (
-                <span className="impact-high">High</span>
+                <span className="impact-major">Major</span>
               ) : cme.analysis.speed > 500 ? (
                 <span className="impact-moderate">Moderate</span>
               ) : (
-                <span className="impact-low">Low</span>
+                <span className="impact-minor">Minor</span>
               )}
             </p>
           </div>

@@ -116,12 +116,12 @@ export default function StatusPage() {
       <div className="title-date-controls">
         <div className="header-section">
           <div className="title-container">
-            <h2 className="status-title">Solar Flare Command Center</h2>
+            <h2 className="status-title">Solar Activity Command Center</h2>
           </div>
         </div>
         
         <div className="notification-area">
-          {(loading || loadingCMEs) && <div className="loading-notification">Loading flare data...</div>}
+          {(loading || loadingCMEs) && <div className="loading-notification">Loading data...</div>}
           {error && <div className="error-notification">{error}</div>}
           {errorCMEs && <div className="error-notification">{errorCMEs}</div>}
         </div>
@@ -252,7 +252,7 @@ export default function StatusPage() {
 
         <div className="info-panel-status">
           <div className="panel-header">
-            <h3>Flare Analysis</h3>
+            <h3>Data Analysis</h3>
             <div className="panel-controls-right">
               <div className="sort-control">
                 <label className="control-label">Sort by:</label>
@@ -314,7 +314,7 @@ export default function StatusPage() {
             <div className="stats-header">Solar Flares</div>
             <div className="stats-card">
               <span className="stats-value">{flaresToDisplay.length}</span>
-              <span className="stats-label">Total Flares</span>
+              <span className="stats-label">Total</span>
             </div>
             <div className="stats-card major">
               <span className="stats-value">
@@ -354,8 +354,8 @@ export default function StatusPage() {
                   <div className="flare-card-header">
                     <h4 className="flare-class">CME Event</h4>
                     <span className="severity moderate">
-                      {cme.analysis?.speed > 1000 ? "High" :
-                       cme.analysis?.speed > 500 ? "Moderate" : "Low"}
+                      {cme.analysis?.speed > 1000 ? "Major" :
+                       cme.analysis?.speed > 500 ? "Moderate" : "Minor"}
                     </span>
                   </div>
                   <div className="flare-details">
