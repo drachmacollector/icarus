@@ -1,7 +1,7 @@
 // src/Solar Flare/components/GlobeVisualizer.jsx
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import Globe from 'react-globe.gl';
 import * as THREE from 'three';
 import DatePicker from 'react-datepicker';
@@ -60,8 +60,8 @@ export default function GlobeVisualizer({
     setSubsolar(pt);
 
     const worst = flares.reduce((acc, f) => {
-      if (f.classType === 'X') return 'X';
-      if (f.classType === 'M' && acc !== 'X') return 'M';
+      if (f.classType?.startsWith('X')) return 'X';
+      if (f.classType?.startsWith('M') && acc !== 'X') return 'M';
       return acc;
     }, null);
 
@@ -97,41 +97,50 @@ export default function GlobeVisualizer({
   const normStart = normalizeDate(startDate);
   const normEnd = normalizeDate(endDate);
 
+  const isInRange = (date) => {
+    if (startDate && endDate) {
+      return date >= normStart && date <= normEnd;
+    } else if (selectedDate) {
+      return isSameDay(date, normSelected);
+    }
+    return true;
+  };
+
   const filteredFlares = flares.filter(f => {
-    const flareDate = new Date(f.peakTime);
-    const normFlareDate = normalizeDate(flareDate);
-
-    if (selectedDate && !isSameDay(normFlareDate, normSelected)) return false;
-    if (startDate && normFlareDate < normStart) return false;
-    if (endDate && normFlareDate > normEnd) return false;
-    if (selectedClass !== 'All' && selectedClass !== 'B' && f.classType !== selectedClass) return false;
-
+    const flareDate = normalizeDate(new Date(f.peakTime));
+    if (!isInRange(flareDate)) return false;
+    if (selectedClass !== 'All' && !f.classType?.startsWith(selectedClass)) return false;
     return true;
   });
 
-  const flarePoints = filteredFlares.map(f => ({
-    lat: f.lat,
-    lng: f.lng,
-    size: f.size || 0.3,
-    color: f.classType === 'X' ? 'red' : f.classType === 'M' ? 'orange' : 'yellow',
-    flare: f
-  }));
+  const flarePoints = filteredFlares.map(f => {
+    let color = 'gray';
+    if (f.classType?.startsWith('X')) color = 'red';
+    else if (f.classType?.startsWith('M')) color = 'orange';
+    else if (f.classType?.startsWith('C')) color = 'green';
+    else if (f.classType?.startsWith('B')) color = 'gray';
+
+    return {
+      lat: f.lat,
+      lng: f.lng,
+      size: f.size || 0.3,
+      color,
+      flare: f
+    };
+  });
 
   const flareArcs = filteredFlares.map(f => ({
     startLat: f.lat,
     startLng: f.lng,
     endLat: f.lat + 15,
     endLng: f.lng + 15,
-    color: f.classType === 'X' ? ['red'] : ['orange'],
+    color: f.classType?.startsWith('X') ? ['red'] : ['orange'],
     flare: f
   }));
 
   const filteredHeatmap = heatmapData.filter(d => {
     const dataDate = normalizeDate(new Date(d.date));
-    if (selectedDate && !isSameDay(dataDate, normSelected)) return false;
-    if (startDate && dataDate < normStart) return false;
-    if (endDate && dataDate > normEnd) return false;
-    return true;
+    return isInRange(dataDate);
   });
 
   const heatPoints = filteredHeatmap.map(d => {
@@ -158,7 +167,11 @@ export default function GlobeVisualizer({
             <DatePicker
               className="datepicker-input"
               selected={selectedDate}
-              onChange={setSelectedDate}
+              onChange={date => {
+                setSelectedDate(date);
+                setStartDate(null);
+                setEndDate(null);
+              }}
               dateFormat="yyyy-MM-dd"
               isClearable
               placeholderText="Select date"
@@ -176,6 +189,7 @@ export default function GlobeVisualizer({
               onChange={(update) => {
                 setStartDate(update[0]);
                 setEndDate(update[1]);
+                setSelectedDate(null);
               }}
               isClearable
               dateFormat="yyyy-MM-dd"
@@ -188,10 +202,9 @@ export default function GlobeVisualizer({
             <label>☀️ Filter by flare class:</label>
             <select value={selectedClass} onChange={e => setSelectedClass(e.target.value)}>
               <option value="All">All</option>
-              <option value="X">X (Major)</option>
-              <option value="M">M (Moderate)</option>
-              <option value="C">C (Minor)</option>
-              <option value="B">B (Mild)</option>
+              <option value="X" style={{ color: 'red' }}>X (Major)</option>
+              <option value="M" style={{ color: 'orange' }}>M (Moderate)</option>
+              <option value="C" style={{ color: 'green' }}>C (Minor)</option>
             </select>
           </div>
         </div>
@@ -266,7 +279,6 @@ export default function GlobeVisualizer({
             {autoRotate ? '⏸ Pause Rotation' : '▶ Resume Rotation'}
           </button>
         )}
-        
       </div>
     </div>
   );
