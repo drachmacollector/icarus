@@ -1,39 +1,17 @@
-// src/components/CmeTooltip.jsx
 import React from 'react';
+import './cme.css';
 
-export default function CmeTooltip({ cme, screenPos, onClose }) {
-  if (!cme || !screenPos) return null;
-
-  const style = {
-    position: 'absolute',
-    left: screenPos.x,
-    top: screenPos.y,
-    transform: 'translate(-50%, -100%)',
-    background: 'rgba(0,0,0,0.9)',
-    color: '#fff',
-    padding: '0.75rem',
-    borderRadius: '6px',
-    pointerEvents: 'auto',
-    maxWidth: 260,
-    zIndex: 2000,
-    fontSize: '0.85rem',
-    lineHeight: 1.3
-  };
+export default function CmeTooltip({ cme, onClose }) {
+  if (!cme) return null;
 
   return (
-    <div style={style}>
+    <div className="cme-tooltip-fixed">
       <button
         onClick={onClose}
-        style={{
-          position: 'absolute', top: 4, right: 6,
-          background: 'transparent', border: 'none',
-          color: '#888', cursor: 'pointer', fontSize: '1.1rem'
-        }}
+        className="cme-tooltip-btn-close"
       >×</button>
 
-      <h4 style={{ margin: '0 0 0.5rem', color: '#4da6ff' }}>
-        📄 {cme.activityID}
-      </h4>
+      <h4>{cme.activityID}</h4>
 
       <p><strong>Catalog:</strong> {cme.catalog}</p>
       <p><strong>Start:</strong> {new Date(cme.startTime).toUTCString()}</p>
@@ -49,7 +27,7 @@ export default function CmeTooltip({ cme, screenPos, onClose }) {
         {(cme.instruments || []).map(i => i.displayName).join(', ') || 'N/A'}
       </p>
 
-      <hr style={{ borderColor: '#333', margin: '0.5rem 0' }}/>
+      <hr/>
 
       <p><strong>Analysis:</strong></p>
       {cme.analysis ? (
@@ -75,7 +53,6 @@ export default function CmeTooltip({ cme, screenPos, onClose }) {
         href={cme.link}
         target="_blank"
         rel="noopener noreferrer"
-        style={{ color: '#4da6ff', display:'block', marginTop:'0.5rem' }}
       >
         🔗 Full NASA Details
       </a>
