@@ -13,7 +13,7 @@ const News = () => {
   const [esaNews, setEsaNews] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const articlesPerPage = 6;
+  const articlesPerPage = 8;
   const [loading, setLoading] = useState(true);
   const [filteredArticles, setFilteredArticles] = useState([]);
 
@@ -53,6 +53,11 @@ const News = () => {
   const currentArticles = filteredArticles.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filteredArticles.length / articlesPerPage);
 
+  // Handle image loading errors
+  const handleImageError = (e) => {
+    e.target.src = "https://images.unsplash.com/photo-1543722530-d2c3201371e7?q=80&w=1174&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
+  };
+
   return (
     <div className="news-container-news">
       <div className="news-header">
@@ -91,8 +96,9 @@ const News = () => {
               <div key={article.id} className="news-card">
                 <div className="card-image">
                   <img
-                    src={article.imageUrl || "https://images.unsplash.com/photo-1543722530-d2c3201371e7?q=80&w=1174&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"}
+                    src={article.image_url || "https://images.unsplash.com/photo-1543722530-d2c3201371e7?q=80&w=1174&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"}
                     alt={article.title}
+                    onError={handleImageError}
                   />
                 </div>
                 <div className="card-content">
