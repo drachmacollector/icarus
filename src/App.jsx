@@ -16,7 +16,7 @@ import Home from "./Home/Home";
 import AboutPage from './About/AboutPage';
 
 
-import './App.css'; // 
+import './App.css'; 
 
 export default function App() {
   const { flares, loading, error, refresh } = useFlareData();
