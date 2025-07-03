@@ -9,9 +9,37 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-links">
+<<<<<<< HEAD
         <Link to="/" className={`nav-link ${location.pathname === "/" ? "active" : ""}`}>
           Home
         </Link>
+=======
+  <Link to="/" className={`nav-link ${location.pathname === "/" ? "active" : ""}`}>
+    Home
+  </Link>
+  <Link to="/News" className={`nav-link ${location.pathname === "/News" ? "active" : ""}`}>
+    News
+  </Link>
+  <Link to="/Flare" className={`nav-link ${location.pathname === "/Flare" ? "active" : ""}`}>
+    Solar Flares
+  </Link>
+  <Link to="/CmeTracker" className={`nav-link ${location.pathname === "/CmeTracker" ? "active" : ""}`}>
+    Coronal Mass Ejections (CME)
+  </Link>
+  <Link to="/Status" className={`nav-link ${location.pathname === "/Status" ? "active" : ""}`}>
+    Status
+  </Link>
+  <Link to="/HeatMapDashboard" className={`nav-link ${location.pathname === "/HeatMapDashboard" ? "active" : ""}`}>
+    Heat Map
+  </Link>
+  <Link to="/AuroraForecast" className={`nav-link ${location.pathname === "/risk" ? "active" : ""}`}>
+    Auroras
+  </Link>
+  <Link to="/Timeline" className={`nav-link ${location.pathname === "/Timeline" ? "active" : ""}`}>
+    Timeline
+  </Link>
+</div>
+>>>>>>> 0032b9db6ab8114a97d3dbb887cba7a66bc026b2
 
         <Link to="/News" className={`nav-link ${location.pathname === "/News" ? "active" : ""}`}>
           News

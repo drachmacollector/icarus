@@ -1,13 +1,32 @@
-import React, { useEffect } from 'react';
+// src/components/Home.jsx
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import './Home.css';
 
 const Home = () => {
+  const [showIndicator, setShowIndicator] = useState(true);
+  const location = useLocation();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowIndicator(window.scrollY === 0);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   useEffect(() => {
     const video = document.getElementById('bgVideo');
     if (video) {
-      video.addEventListener('loadedmetadata', () => {
-        video.currentTime = video.duration / 2;
-      });
+      const handleLoadedMetadata = () => {
+        video.currentTime = video.duration / 4;
+      };
+
+      video.addEventListener('loadedmetadata', handleLoadedMetadata);
+      return () => {
+        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      };
     }
   }, []);
 
@@ -21,6 +40,23 @@ const Home = () => {
       <div className="overlay-content">
         <h1>Icarus</h1>
         <p>Mapping solar fury & auroral beauty across the Earth's skies</p>
+      </div>
+
+      {showIndicator && (
+        <div className="sd-container">
+          <div className="arrow"></div>
+          <div className="arrow"></div>
+        </div>
+      )}
+
+      {/* Glassmorphic button shown at the bottom of the scrollable page */}
+      <div className="bottom-button-container">
+        <Link
+          to="/AboutPage"
+          className={`glass-button nav-link ${location.pathname === "/AboutPage" ? "active" : ""}`}
+        >
+          About the Project
+        </Link>
       </div>
     </div>
   );
