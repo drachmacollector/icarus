@@ -29,6 +29,9 @@ export default function Navbar() {
   <Link to="/Timeline" className={`nav-link ${location.pathname === "/Timeline" ? "active" : ""}`}>
     Timeline
   </Link>
+  <Link to="/AboutPage" className={`nav-link ${location.pathname === "/AboutPage" ? "active" : ""}`}>
+    ABOUT
+  </Link>
 </div>
 
     </nav>
