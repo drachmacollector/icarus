@@ -53,7 +53,7 @@ pointRadius={d =>
       {/* Controls Panel */}
       <div style={{
         position: 'absolute',
-        top: 10, left: 10,
+        top: 70, left: 10,
         width: '28%', maxHeight: '95%',
         zIndex: 1000,
         background: 'rgba(0,0,0,0.75)',
