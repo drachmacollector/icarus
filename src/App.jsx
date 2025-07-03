@@ -12,7 +12,7 @@ import AuroraForecast from './Aurora/components/AuroraForecast';
 import HeatMapGlobe from './HeatMap/components/HeatMapGlobe';
 import HeatMapDashboard from './HeatMap/components/HeatMapDashboard';
 import Timeline from "./Timeline/Timeline";
-import Home from "./home/Home";
+import Home from "./Home/Home";
 import AboutPage from './About/AboutPage';
 
 
@@ -36,12 +36,12 @@ export default function App() {
             element={<GlobeVisualizer flares={flares} currentTime={currentTime} />
             }/>
           <Route path="/Analysis" element={<AnalysisPage flares={flares} />} />
-          <Route path="/risk" element={<RiskPage />} />
+          <Route path="/Risk" element={<RiskPage />} />
           <Route path="/CmeTracker" element={<CmeTracker />} />
           <Route path="/News" element={<News />} />
           <Route path="/AuroraForecast" element={<AuroraForecast />} />
           <Route path="/HeatMapDashboard" element={<HeatMapDashboard />} />
-          <Route path="/timeline" element={<Timeline />} />
+          <Route path="/Timeline" element={<Timeline />} />
           <Route path="/AboutPage" element={<AboutPage />} />
         </Routes>
       </div>
