@@ -38,8 +38,8 @@ export default function Navbar() {
         </div>
         {/* Dropdown End */}
 
-        <Link to="/Status" className={`nav-link ${location.pathname === "/Status" ? "active" : ""}`}>
-          Status
+        <Link to="/analysis" className={`nav-link ${location.pathname === "/analysis" ? "active" : ""}`}>
+          analysis
         </Link>
 
         <Link to="/Timeline" className={`nav-link ${location.pathname === "/Timeline" ? "active" : ""}`}>

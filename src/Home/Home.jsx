@@ -49,15 +49,6 @@ const Home = () => {
         </div>
       )}
 
-      {/* Glassmorphic button shown at the bottom of the scrollable page */}
-      <div className="bottom-button-container">
-        <Link
-          to="/AboutPage"
-          className={`glass-button nav-link ${location.pathname === "/AboutPage" ? "active" : ""}`}
-        >
-          About the Project
-        </Link>
-      </div>
     </div>
   );
 };

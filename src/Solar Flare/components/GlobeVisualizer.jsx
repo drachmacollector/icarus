@@ -85,7 +85,7 @@ export default function GlobeVisualizer({
     let color = 'green', altitude = 0.05, radius = 0.2;
     if (cls === 'X') { color = 'red'; altitude = 0.3; radius = 0.5; }
     else if (cls === 'M') { color = 'yellow'; altitude = 0.2; radius = 0.4; }
-    else if (cls === 'C') { color = 'greenyellow'; altitude = 0.1; radius = 0.3; }
+    else if (cls === 'C') { color = 'green'; altitude = 0.1; radius = 0.3; }
 
     return {
       lat: f.lat,

@@ -2,11 +2,11 @@ import React, { useState, useMemo } from "react";
 import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "react-datepicker/dist/react-datepicker.css";
-import "./status.css";
+import "./Analysis.css";
 import DatePicker from "react-datepicker";
 import { format } from "date-fns";
-import useFlareData from "../hooks/useFlareData";
-import useCmeData from "../../cme/hooks/useCmeData";
+import useFlareData from "../Solar Flare/hooks/useFlareData";
+import useCmeData from "../cme/hooks/useCmeData";
 
 function toDMS(deg, isLat) {
   if (deg === null || deg === undefined) return "Unknown";
@@ -19,7 +19,7 @@ function toDMS(deg, isLat) {
   return `${degrees}°${minutes}'${seconds}" ${direction}`;
 }
 
-export default function StatusPage() {
+export default function analysisPage() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
@@ -108,11 +108,11 @@ export default function StatusPage() {
   const mapData = showCMEs ? cmesToDisplay : flaresToDisplay;
 
   return (
-    <div className="status-container">
+    <div className="analysis-container">
       <div className="title-date-controls">
         <div className="header-section">
           <div className="title-container">
-            <h2 className="status-title">Solar Activity Command Center</h2>
+            <h2 className="analysis-title">Solar Activity Command Center</h2>
           </div>
         </div>
         <div className="notification-area">
@@ -215,7 +215,7 @@ export default function StatusPage() {
           </MapContainer>
         </div>
 
-        <div className="info-panel-status">
+        <div className="info-panel-analysis">
           <div className="panel-header">
             <h3>Data Analysis</h3>
             <div className="panel-controls-right">
