@@ -42,20 +42,20 @@ export default function CmeTracker() {
         pointColor={d => {
           const speed = d.analysis.speed;
           if (speed > 1000) return '#ff0000';
-          if (speed > 500) return '#ffd500';
+          if (speed > 500) return '#ffff00';
           return '#45ff3b';
         }}
         pointAltitude={d => {
           const speed = d.analysis.speed;
           if (speed > 1000) return 0.3;
-          if (speed > 500) return 0.15;
+          if (speed > 500) return 0.2;
           return 0.1;
         }}
         pointRadius={d => {
           const speed = d.analysis.speed;
           if (speed > 1000) return 0.5;
-          if (speed > 500) return 0.35;
-          return 0.25;
+          if (speed > 500) return 0.4;
+          return 0.3;
         }}
         onPointClick={handlePointClick}
       />

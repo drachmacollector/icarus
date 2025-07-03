@@ -1,300 +1,191 @@
 // src/Solar Flare/components/GlobeVisualizer.jsx
 
 import React, { useEffect, useRef, useState } from 'react';
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Globe from 'react-globe.gl';
 import * as THREE from 'three';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { computeSubsolarPoint } from '../utils/geoUtils';
-import CmeTracker from '../../CME/components/CmeTracker';
 import useFlareData from "../hooks/useFlareData";
 import { format } from 'date-fns';
 import './Globe.css';
 
 export default function GlobeVisualizer({
-  flares,
-  currentTime,
   cityData = [],
   heatmapData = []
 }) {
+  const navigate = useNavigate();
   const location = useLocation();
   const globeEl = useRef();
   const [subsolar, setSubsolar] = useState({ lat: 0, lng: 0 });
-  const [hemisphereRGB, setHemisphereRGB] = useState('navy');
-  const [hemisphereOpacity, setHemisphereOpacity] = useState(0.75);
   const [autoRotate, setAutoRotate] = useState(true);
-  const [showMode, setShowMode] = useState('flares');
-
   const [selectedDate, setSelectedDate] = useState(null);
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const [startDate, setStartDate]       = useState(null);
+  const [endDate, setEndDate]           = useState(null);
   const [selectedClass, setSelectedClass] = useState('All');
 
-  const rgbMap = {
-    green: '0,255,0',
-    yellow: '255,255,0',
-    red: '255,0,0',
-    navy: '0,0,128',
-  };
-
+  // Fetch flares
   const { flares: fetchedFlares, loading, error } = useFlareData({
     startDate: startDate ? format(startDate, "yyyy-MM-dd") : undefined,
-    endDate: endDate ? format(endDate, "yyyy-MM-dd") : undefined
+    endDate:   endDate   ? format(endDate,   "yyyy-MM-dd") : undefined
   });
 
+  // Hemisphere mesh (unchanged)
   const hemiMeshRef = useRef();
-  if (!hemiMeshRef.current) {
-    const geom = new THREE.SphereGeometry(1.01, 75, 75, 0, Math.PI);
-    const mat = new THREE.MeshBasicMaterial({
-      color: `rgb(${rgbMap[hemisphereRGB]})`,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: hemisphereOpacity
-    });
-    hemiMeshRef.current = new THREE.Mesh(geom, mat);
-  }
+  useEffect(() => {
+    if (!hemiMeshRef.current) {
+      const geom = new THREE.SphereGeometry(1.01, 75, 75, 0, Math.PI);
+      const mat  = new THREE.MeshBasicMaterial({
+        color: 'rgba(0,0,128,0.75)', side: THREE.DoubleSide, transparent: true
+      });
+      hemiMeshRef.current = new THREE.Mesh(geom, mat);
+    }
+  }, []);
 
+  // Auto-rotate
   useEffect(() => {
     if (globeEl.current) {
-      globeEl.current.controls().autoRotate = autoRotate;
-      globeEl.current.controls().autoRotateSpeed = 0.8;
+      const controls = globeEl.current.controls();
+      controls.autoRotate = autoRotate;
+      controls.autoRotateSpeed = 0.8;
     }
   }, [autoRotate]);
 
+  // Subsolar shading (unchanged)
   useEffect(() => {
-    const pt = computeSubsolarPoint(currentTime);
+    const now = new Date();
+    const pt  = computeSubsolarPoint(now);
     setSubsolar(pt);
+  }, [fetchedFlares, selectedDate]);
 
-    const worst = fetchedFlares.reduce((acc, f) => {
-      if (f.classType?.startsWith('X')) return 'X';
-      if (f.classType?.startsWith('M') && acc !== 'X') return 'M';
-      if (f.classType?.startsWith('C') && !['X', 'M'].includes(acc)) return 'C';
-      return acc;
-    }, null);
-
-    let rgbColor = 'navy';
-    let opacity = 0.75;
-    if (worst === 'X') {
-      rgbColor = 'red';
-      opacity = 0.3;
-    } else if (worst === 'M') {
-      rgbColor = 'yellow';
-      opacity = 0.3;
-    }
-
-    setHemisphereRGB(rgbColor);
-    setHemisphereOpacity(opacity);
-
-    hemiMeshRef.current.material.color.set(`rgb(${rgbMap[rgbColor]})`);
-    hemiMeshRef.current.material.opacity = opacity;
-    hemiMeshRef.current.material.needsUpdate = true;
-  }, [currentTime, fetchedFlares]);
-
-  const isSameDay = (d1, d2) =>
-    d1.getFullYear() === d2.getFullYear() &&
-    d1.getMonth() === d2.getMonth() &&
-    d1.getDate() === d2.getDate();
-
-  const normalizeDate = (date) => {
-    if (!date) return null;
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  };
-
-  const normSelected = normalizeDate(selectedDate);
-  const normStart = normalizeDate(startDate);
-  const normEnd = normalizeDate(endDate);
-
-  const isInRange = (date) => {
+  // Filter by date/class
+  const normalize = d => d && new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const isSameDay = (a,b) => a && b && a.getTime()===b.getTime();
+  const inRange = date => {
+    const d = normalize(new Date(date));
+    if (selectedDate) return isSameDay(d, normalize(selectedDate));
     if (startDate && endDate) {
-      return date >= normStart && date <= normEnd;
-    } else if (selectedDate) {
-      return isSameDay(date, normSelected);
+      const s = normalize(startDate), e = normalize(endDate);
+      return d >= s && d <= e;
     }
     return true;
   };
 
-  const filteredFlares = fetchedFlares.filter(f => {
-    const flareDate = normalizeDate(new Date(f.peakTime));
-    if (!isInRange(flareDate)) return false;
-    if (selectedClass !== 'All' && !f.classType?.startsWith(selectedClass)) return false;
-    return true;
+  const filtered = fetchedFlares.filter(f => {
+    if (!inRange(f.peakTime)) return false;
+    if (selectedClass!=='All' && !f.classType.startsWith(selectedClass)) return false;
+    return f.lat!=null;
   });
 
-  const flarePoints = filteredFlares.map(f => {
-    let color = 'gray';
-    if (f.classType?.startsWith('X')) color = 'red';
-    else if (f.classType?.startsWith('M')) color = 'orange';
-    else if (f.classType?.startsWith('C')) color = 'green';
-    else if (f.classType?.startsWith('B')) color = 'gray';
+  // Build rods as pointsData
+  const pointsData = filtered.map(f => {
+    const cls = f.classType[0]; // 'X','M','C', etc.
+    // define color, length, radius by class
+    let color='green', altitude=0.05, radius=0.2;
+    if (cls==='X') { color='red';     altitude=0.3; radius=0.5; }
+    else if (cls==='M'){ color='yellow'; altitude=0.2; radius=0.4; }
+    else if (cls==='C'){ color='greenyellow'; altitude=0.1; radius=0.3; }
 
     return {
       lat: f.lat,
       lng: f.lng,
-      size: f.size || 0.3,
       color,
+      altitude,
+      radius,
       flare: f
     };
   });
 
-  const flareArcs = filteredFlares.map(f => ({
-    startLat: f.lat,
-    startLng: f.lng,
-    endLat: f.lat + 15,
-    endLng: f.lng + 15,
-    color: f.classType?.startsWith('X') ? ['red'] : ['orange'],
-    flare: f
-  }));
-
-  const filteredHeatmap = heatmapData.filter(d => {
-    const dataDate = normalizeDate(new Date(d.date));
-    return isInRange(dataDate);
-  });
-
-  const heatPoints = filteredHeatmap.map(d => {
-    const intensity = Math.max(0, Math.min(1, d.intensity ?? 0));
-    let color = 'yellow';
-    if (intensity > 0.75) color = 'red';
-    else if (intensity > 0.5) color = 'orange';
-    else if (intensity > 0) color = 'green';
-
-    return {
-      lat: d.lat,
-      lng: d.lng,
-      size: intensity * 0.4,
-      color
-    };
-  });
-
   return (
-    <div style={{ position: 'relative', height: '100%', width: '100%' }}>
-      {showMode === 'flares' && (
-        <div className="controls-container">
-          <div>
-            <label>📅 Filter by exact date:</label>
-            <DatePicker
-              className="datepicker-input"
-              selected={selectedDate}
-              onChange={date => {
-                setSelectedDate(date);
-                setStartDate(null);
-                setEndDate(null);
-              }}
-              dateFormat="yyyy-MM-dd"
-              isClearable
-              placeholderText="Select date"
-              maxDate={new Date()}
-            />
-          </div>
+    <div className="globe-container">
+      <div className="controls-container">
+        <button
+          className="control-button"
+          onClick={() => navigate('/status')}
+        >
+          📊 Status Page
+        </button>
 
-          <div>
-            <label>⏱ Filter by date range:</label>
-            <DatePicker
-              selected={startDate}
-              onChange={setStartDate}
-              dateFormat="yyyy-MM-dd"
-              maxDate={new Date()}
-              minDate={new Date("2010-01-01")}
-              placeholderText="Start Date"
-              className="datepicker"
-            />
-          </div>
-
-          <div className="date-picker-group">
-            <label className="date-label">End Date</label>
-            <DatePicker
-              selected={endDate}
-              onChange={setEndDate}
-              dateFormat="yyyy-MM-dd"
-              maxDate={new Date()}
-              minDate={startDate || new Date("2010-01-01")}
-              placeholderText="End Date"
-              className="datepicker"
-            />
-          </div>
-
-          <div>
-            <label>☀️ Filter by flare class:</label>
-            <select value={selectedClass} onChange={e => setSelectedClass(e.target.value)}>
-              <option value="All">All</option>
-              <option value="X">X (Major)</option>
-              <option value="M">M (Moderate)</option>
-              <option value="C">C (Minor)</option>
-            </select>
-          </div>
+        <div>
+          <label>📅 Exact Date:</label>
+          <DatePicker
+            selected={selectedDate}
+            onChange={d => {
+              setSelectedDate(d);
+              setStartDate(null); setEndDate(null);
+            }}
+            dateFormat="yyyy-MM-dd"
+            isClearable
+            placeholderText="Select date"
+          />
         </div>
-      )}
 
-      {showMode === 'flares' && (
-        <Globe
-          ref={globeEl}
-          globeImageUrl="https://unpkg.com/three-globe/example/img/earth-night.jpg"
-          backgroundImageUrl="https://unpkg.com/three-globe/example/img/night-sky.png"
-          showAtmosphere
-          atmosphereColor="blue"
-          atmosphereAltitude={0.25}
-          backgroundColor="#000000"
-          labelsData={flarePoints}
-          labelLat="lat"
-          labelLng="lng"
-          labelText={() => ''}
-          labelDotRadius="size"
-          labelColor="color"
-          labelAltitude={0.02}
-          onLabelClick={p => alert(`Flare ${p.flare.classType} peaked at ${p.flare.peakTime}`)}
-          arcsData={flareArcs}
-          arcStartLat="startLat"
-          arcStartLng="startLng"
-          arcEndLat="endLat"
-          arcEndLng="endLng"
-          arcColor="color"
-          arcDashLength={0.01}
-          arcDashGap={0}
-          arcStroke={1.2}
-          arcAltitude={0.3}
-          onArcClick={a => alert(`Flare ${a.flare.classType} peaked at ${a.flare.peakTime}`)}
-          customLayerData={[subsolar]}
-          customThreeObject={() => hemiMeshRef.current}
-          customThreeObjectUpdate={(obj, { lat, lng }) => {
-            obj.position.setFromSphericalCoords(
-              1,
-              (90 - lat) * (Math.PI / 180),
-              (lng + 180) * (Math.PI / 180)
-            );
-            obj.lookAt(obj.position.clone().multiplyScalar(2));
-          }}
-        />
-      )}
+        <div>
+          <label>⏱ Date Range:</label>
+          <DatePicker
+            selected={startDate}
+            onChange={setStartDate}
+            selectsStart startDate={startDate} endDate={endDate}
+            dateFormat="yyyy-MM-dd"
+            placeholderText="Start"
+          />
+          <DatePicker
+            selected={endDate}
+            onChange={setEndDate}
+            selectsEnd   startDate={startDate} endDate={endDate}
+            minDate={startDate}
+            dateFormat="yyyy-MM-dd"
+            placeholderText="End"
+          />
+        </div>
 
-      {showMode === 'heatmap' && (
-        <Globe
-          globeImageUrl="https://unpkg.com/three-globe/example/img/earth-night.jpg"
-          backgroundImageUrl="https://unpkg.com/three-globe/example/img/night-sky.png"
-          showAtmosphere
-          atmosphereColor="blue"
-          atmosphereAltitude={0.25}
-          backgroundColor="#000000"
-          labelsData={heatPoints}
-          labelLat="lat"
-          labelLng="lng"
-          labelText={() => ''}
-          labelDotRadius="size"
-          labelColor="color"
-          labelAltitude={0.02}
-        />
-      )}
-
-      {showMode === 'cme' && (
-        <CmeTracker selectedDate={selectedDate ? selectedDate.toISOString().slice(0, 10) : null} />
-      )}
-
-      <div className="top-buttons">
-        {showMode === 'flares' && (
-          <button onClick={() => setAutoRotate(prev => !prev)} className="control-button">
-            {autoRotate ? '⏸ Pause Rotation' : '▶ Resume Rotation'}
-          </button>
-        )}
+        <div>
+          <label>☀️ Flare Class:</label>
+          <select
+            value={selectedClass}
+            onChange={e => setSelectedClass(e.target.value)}
+          >
+            <option>All</option>
+            <option>X</option>
+            <option>M</option>
+            <option>C</option>
+          </select>
+        </div>
       </div>
+
+      <Globe
+        ref={globeEl}
+        globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
+        backgroundColor="#000000"
+        showAtmosphere
+        atmosphereColor="blue"
+        atmosphereAltitude={0.25}
+
+        // rods as pointsData
+        pointsData={pointsData}
+        pointLat="lat"
+        pointLng="lng"
+        pointColor="color"
+        pointAltitude="altitude"
+        pointRadius="radius"
+        onPointClick={p => alert(`Flare ${p.flare.classType} at ${p.flare.peakTime}`)}
+
+        // Subsolar hemisphere shading
+        customLayerData={[subsolar]}
+        customThreeObject={() => hemiMeshRef.current}
+        customThreeObjectUpdate={(obj, { lat, lng }) => {
+          obj.position.setFromSphericalCoords(
+            1,
+            (90 - lat) * (Math.PI/180),
+            (lng + 180) * (Math.PI/180)
+          );
+          obj.lookAt(obj.position.clone().multiplyScalar(2));
+        }}
+      />
+
+      {loading && <div className="loading-overlay">Loading flares…</div>}
+      {error   && <div className="error-overlay">Error loading data</div>}
     </div>
   );
 }
