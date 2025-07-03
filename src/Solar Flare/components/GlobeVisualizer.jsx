@@ -266,12 +266,7 @@ export default function GlobeVisualizer({
             {autoRotate ? '⏸ Pause Rotation' : '▶ Resume Rotation'}
           </button>
         )}
-        <Link
-          to="/status"
-          className={`nav-link ${location.pathname === "/status" ? "active" : ""}`}
-        >
-          🗺️ Status Map
-        </Link>
+        
       </div>
     </div>
   );

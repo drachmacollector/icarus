@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
 import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "react-datepicker/dist/react-datepicker.css";
@@ -7,20 +6,15 @@ import "./status.css";
 import DatePicker from "react-datepicker";
 import { format } from "date-fns";
 import useFlareData from "../hooks/useFlareData";
+import useCmeData from "../../cme/hooks/useCmeData";
 
 function toDMS(deg, isLat) {
   if (deg === null || deg === undefined) return "Unknown";
   const absolute = Math.abs(deg);
   const degrees = Math.floor(absolute);
-  const minutesNotTruncated = (absolute - degrees) * 60;
-  const minutes = Math.floor(minutesNotTruncated);
-  const seconds = Math.floor((minutesNotTruncated - minutes) * 60);
-  let direction = "";
-  if (isLat) {
-    direction = deg >= 0 ? "N" : "S";
-  } else {
-    direction = deg >= 0 ? "E" : "W";
-  }
+  const minutes = Math.floor((absolute - degrees) * 60);
+  const seconds = Math.floor(((absolute - degrees) * 60 - minutes) * 60);
+  const direction = isLat ? (deg >= 0 ? "N" : "S") : (deg >= 0 ? "E" : "W");
   return `${degrees}°${minutes}'${seconds}" ${direction}`;
 }
 
@@ -30,8 +24,14 @@ export default function StatusPage() {
   const [endDate, setEndDate] = useState(null);
   const [showOnlyMapped, setShowOnlyMapped] = useState(true);
   const [sortOrder, setSortOrder] = useState("default");
+  const [showCMEs, setShowCMEs] = useState(false);
 
   const { flares, loading, error } = useFlareData({
+    startDate: startDate ? format(startDate, "yyyy-MM-dd") : undefined,
+    endDate: endDate ? format(endDate, "yyyy-MM-dd") : undefined
+  });
+
+  const { cmes, loading: loadingCMEs, error: errorCMEs } = useCmeData({
     startDate: startDate ? format(startDate, "yyyy-MM-dd") : undefined,
     endDate: endDate ? format(endDate, "yyyy-MM-dd") : undefined
   });
@@ -42,12 +42,6 @@ export default function StatusPage() {
   }, [flares, selectedDate]);
 
   const flaresWithCoords = filteredFlares.filter(f => f.lat !== null && f.lng !== null);
-  const flaresWithoutCoords = filteredFlares.filter(f => f.lat === null || f.lng === null);
-
-  const uniqueDates = useMemo(() => {
-    const dateSet = new Set(flares.map(f => new Date(f.peakTime).toDateString()));
-    return [...dateSet].sort((a, b) => new Date(b) - new Date(a));
-  }, [flares]);
 
   const resetDateRange = () => {
     setStartDate(null);
@@ -71,148 +65,128 @@ export default function StatusPage() {
     return "Mild";
   };
 
-  const flaresToDisplay = useMemo(() => {
-    let result = showOnlyMapped ? flaresWithCoords : filteredFlares;
-    
-    // Apply sorting
-    if (sortOrder === "severity-desc") {
-      return [...result].sort((a, b) => {
-        const severityA = getSeverityOrder(a.classType);
-        const severityB = getSeverityOrder(b.classType);
-        return severityB - severityA;
-      });
-    } else if (sortOrder === "severity-asc") {
-      return [...result].sort((a, b) => {
-        const severityA = getSeverityOrder(a.classType);
-        const severityB = getSeverityOrder(b.classType);
-        return severityA - severityB;
-      });
-    }
-    
-    return result;
-  }, [showOnlyMapped, filteredFlares, flaresWithCoords, sortOrder]);
-
-  function getSeverityOrder(classType) {
+  const getSeverityOrder = (classType) => {
     if (!classType) return 0;
     if (classType.startsWith("X")) return 4;
     if (classType.startsWith("M")) return 3;
     if (classType.startsWith("C")) return 2;
     return 1;
-  }
+  };
+
+  const flaresToDisplay = useMemo(() => {
+    let result = showOnlyMapped ? flaresWithCoords : filteredFlares;
+    if (showCMEs) result = result.filter(f => f.isCME);
+    if (sortOrder === "severity-desc") {
+      return [...result].sort((a, b) => getSeverityOrder(b.classType) - getSeverityOrder(a.classType));
+    } else if (sortOrder === "severity-asc") {
+      return [...result].sort((a, b) => getSeverityOrder(a.classType) - getSeverityOrder(b.classType));
+    }
+    return result;
+  }, [showOnlyMapped, filteredFlares, flaresWithCoords, sortOrder, showCMEs]);
+
+  const cmesToDisplay = useMemo(() => cmes || [], [cmes]);
+
+  const mapData = showCMEs ? cmesToDisplay : flaresToDisplay;
 
   return (
     <div className="status-container">
-
-
-        <div className="title-date-controls">
-          <div className="header-section">
-            <div className="title-container">
-              <h2 className="status-title">Solar Flare Command Center</h2>
-            </div>
-          </div>
-          
-          <div className="notification-area">
-            {loading && <div className="loading-notification">Loading flare data...</div>}
-            {error && <div className="error-notification">{error}</div>}
-          </div>
-          
-          <div className="controls-right">
-            <div className="date-picker-group">
-              <div className="date-label">Start Date</div>
-              <DatePicker
-                selected={startDate}
-                onChange={setStartDate}
-                dateFormat="yyyy-MM-dd"
-                maxDate={new Date()}
-                minDate={new Date("2010-01-01")}
-                placeholderText="Start Date"
-                className="datepicker"
-              />
-            </div>
-            
-            <div className="date-picker-group">
-              <label className="date-label">End Date</label>
-              <DatePicker
-                selected={endDate}
-                onChange={setEndDate}
-                dateFormat="yyyy-MM-dd"
-                maxDate={new Date()}
-                minDate={startDate || new Date("2010-01-01")}
-                placeholderText="End Date"
-                className="datepicker"
-              />
-            </div>
-            
-            <button className="reset-btn" onClick={resetDateRange}>
-              Reset Range (Last 30 days)
-            </button>
-          </div>
+      <div className="title-date-controls">
+        <div className="header-section">
+          <h2 className="status-title">Solar Flare Command Center</h2>
         </div>
+
+        <div className="notification-area">
+          {loading && <div className="loading-notification">Loading data...</div>}
+          {error && <div className="error-notification">{error}</div>}
+        </div>
+
+        <div className="controls-right">
+          <div className="date-picker-group">
+            <label>Start Date</label>
+            <DatePicker
+              selected={startDate}
+              onChange={setStartDate}
+              dateFormat="yyyy-MM-dd"
+              maxDate={new Date()}
+              minDate={new Date("2010-01-01")}
+              placeholderText="Start Date"
+              className="datepicker"
+            />
+          </div>
+          <div className="date-picker-group">
+            <label>End Date</label>
+            <DatePicker
+              selected={endDate}
+              onChange={setEndDate}
+              dateFormat="yyyy-MM-dd"
+              maxDate={new Date()}
+              minDate={startDate || new Date("2010-01-01")}
+              placeholderText="End Date"
+              className="datepicker"
+            />
+          </div>
+          <button className="reset-btn" onClick={resetDateRange}>
+            Reset Range (Last 30 days)
+          </button>
+        </div>
+      </div>
 
       <div className="map-layout">
         <div className="map-wrapper">
           <div className="map-header">
             <h3>Solar Activity Map</h3>
             <div className="map-legend">
-              <div className="legend-item">
-                <div className="legend-color major"></div>
-                <span>X-Class (Major)</span>
-              </div>
-              <div className="legend-item">
-                <div className="legend-color moderate"></div>
-                <span>M-Class (Moderate)</span>
-              </div>
-              <div className="legend-item">
-                <div className="legend-color minor"></div>
-                <span>C-Class (Minor)</span>
-              </div>
-              <div className="legend-item">
-                <div className="legend-color mild"></div>
-                <span>B-Class (Mild)</span>
-              </div>
+              <div className="legend-item"><div className="legend-color major" />X-Class (Major)</div>
+              <div className="legend-item"><div className="legend-color moderate" />M-Class (Moderate)</div>
+              <div className="legend-item"><div className="legend-color minor" />C-Class (Minor)</div>
+              <div className="legend-item"><div className="legend-color mild" />B-Class (Mild)</div>
             </div>
           </div>
-          
+
           <MapContainer center={[0, 0]} zoom={2} scrollWheelZoom={false} className="flare-map">
             <TileLayer
               url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
               attribution='&copy; <a href="https://carto.com/">CARTO</a>'
             />
-            {flaresToDisplay.map((flare, idx) => {
-              if (flare.lat !== null && flare.lng !== null) {
-                const severityClass = getSeverityClass(flare.classType);
-                return (
-                 <CircleMarker
-  key={idx}
-  center={[flare.lat, flare.lng]}
-  radius={
-    severityClass === "major" ? 8 :
-    severityClass === "moderate" ? 6 :
-    severityClass === "minor" ? 5 : 4
-  }
-  color={
-    severityClass === "major" ? "red" :
-    severityClass === "moderate" ? "orange" :
-    severityClass === "minor" ? "green" : "gray"
-  }
-  fillColor={
-    severityClass === "major" ? "red" :
-    severityClass === "moderate" ? "orange" :
-    severityClass === "minor" ? "green" : "gray"
-  }
-  fillOpacity={0.5}
->
-  <Popup className="flare-popup">
-    <strong>Class:</strong> {flare.classType || "?"} <br />
-    <strong>Peak:</strong> {new Date(flare.peakTime).toUTCString()} <br />
-    <strong>Location:</strong> {toDMS(flare.lat, true)}, {toDMS(flare.lng, false)}
-  </Popup>
-</CircleMarker>
-
-                );
-              }
-              return null;
-            })}
+            {mapData.map((event, idx) => (
+              event.lat !== null && event.lng !== null && (
+                <CircleMarker
+                  key={idx}
+                  center={[event.lat, event.lng]}
+                  radius={
+                    showCMEs ? 6 :
+                      getSeverityClass(event.classType) === "major" ? 8 :
+                      getSeverityClass(event.classType) === "moderate" ? 6 :
+                      getSeverityClass(event.classType) === "minor" ? 5 : 4
+                  }
+                  color={
+                    showCMEs
+                      ? event.analysis?.speed > 1000 ? "red" :
+                        event.analysis?.speed > 500 ? "orange" : "green"
+                      : getSeverityClass(event.classType) === "major" ? "red" :
+                        getSeverityClass(event.classType) === "moderate" ? "orange" :
+                        getSeverityClass(event.classType) === "minor" ? "green" : "gray"
+                  }
+                  fillOpacity={0.5}
+                >
+                  <Popup>
+                    {showCMEs ? (
+                      <>
+                        <strong>ID:</strong> {event.activityID} <br />
+                        <strong>Speed:</strong> {Math.round(event.analysis?.speed || 0)} km/s <br />
+                        <strong>Start:</strong> {new Date(event.startTime).toUTCString()} <br />
+                      </>
+                    ) : (
+                      <>
+                        <strong>Class:</strong> {event.classType || "?"} <br />
+                        <strong>Peak:</strong> {new Date(event.peakTime).toUTCString()} <br />
+                        <strong>Location:</strong> {toDMS(event.lat, true)}, {toDMS(event.lng, false)}
+                      </>
+                    )}
+                  </Popup>
+                </CircleMarker>
+              )
+            ))}
           </MapContainer>
         </div>
 
@@ -220,24 +194,18 @@ export default function StatusPage() {
           <div className="panel-header">
             <h3>Flare Analysis</h3>
             <div className="panel-controls-right">
-              <div className="sort-control">
-                <label className="control-label">Sort by:</label>
-                <select 
-                  value={sortOrder} 
-                  onChange={(e) => setSortOrder(e.target.value)}
-                  className="sort-select"
-                >
-                  <option value="default">Default</option>
-                  <option value="severity-desc">Severity (High to Low)</option>
-                  <option value="severity-asc">Severity (Low to High)</option>
-                </select>
-              </div>
+              <label>Sort by:</label>
+              <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className="sort-select">
+                <option value="default">Default</option>
+                <option value="severity-desc">Severity (High to Low)</option>
+                <option value="severity-asc">Severity (Low to High)</option>
+              </select>
             </div>
           </div>
-          
+
           <div className="panel-controls">
             <div className="date-selector">
-              <label className="control-label">Select Observation Date</label>
+              <label>Select Observation Date</label>
               <DatePicker
                 selected={selectedDate}
                 onChange={date => setSelectedDate(date)}
@@ -246,95 +214,84 @@ export default function StatusPage() {
                 className="datepicker"
               />
             </div>
-            
+
             <div className="location-toggle">
-              <label className="toggle-label">
-                <input
-                  type="checkbox"
-                  checked={showOnlyMapped}
-                  onChange={() => setShowOnlyMapped(!showOnlyMapped)}
-                />
-                <span className="toggle-slider"></span>
-              </label>
-              <span className="toggle-text">
+              <label>
+                <input type="checkbox" checked={showOnlyMapped} onChange={() => setShowOnlyMapped(!showOnlyMapped)} />
                 Show only flares with location data ({flaresWithCoords.length})
-              </span>
+              </label>
+            </div>
+
+            <div className="location-toggle">
+              <label>
+                <input type="checkbox" checked={showCMEs} onChange={() => setShowCMEs(!showCMEs)} />
+                Show CME activity
+              </label>
             </div>
           </div>
-          
+
           <div className="panel-stats">
+            <div className="stats-header">Solar Flares</div>
             <div className="stats-card">
               <span className="stats-value">{flaresToDisplay.length}</span>
               <span className="stats-label">Total Flares</span>
             </div>
-            <div className="stats-card major">
-              <span className="stats-value">
-                {flaresToDisplay.filter(f => getSeverityClass(f.classType) === "major").length}
-              </span>
-              <span className="stats-label">Major</span>
-            </div>
-            <div className="stats-card moderate">
-              <span className="stats-value">
-                {flaresToDisplay.filter(f => getSeverityClass(f.classType) === "moderate").length}
-              </span>
-              <span className="stats-label">Moderate</span>
-            </div>
-            <div className="stats-card minor">
-              <span className="stats-value">
-                {flaresToDisplay.filter(f => getSeverityClass(f.classType) === "minor").length}
-              </span>
-              <span className="stats-label">Minor</span>
-            </div>
-            <div className="stats-card mild">
-              <span className="stats-value">
-                {flaresToDisplay.filter(f => getSeverityClass(f.classType) === "mild").length}
-              </span>
-              <span className="stats-label">Mild</span>
+            {["major", "moderate", "minor", "mild"].map(severity => (
+              <div className={`stats-card ${severity}`} key={`flare-${severity}`}>
+                <span className="stats-value">
+                  {flaresToDisplay.filter(f => getSeverityClass(f.classType) === severity).length}
+                </span>
+                <span className="stats-label">{severity.charAt(0).toUpperCase() + severity.slice(1)}</span>
+              </div>
+            ))}
+            <div className="stats-header">CMEs</div>
+            <div className="stats-card">
+              <span className="stats-value">{cmesToDisplay.length}</span>
+              <span className="stats-label">Total CMEs</span>
             </div>
           </div>
-          
+
           <div className="flare-grid">
-            {flaresToDisplay.map((flare, idx) => {
-              const severityClass = getSeverityClass(flare.classType);
-              const severityLabel = getSeverityLabel(flare.classType);
-              return (
-                <div key={idx} className={`flare-card ${severityClass}`}>
+            {showCMEs ? (
+              cmesToDisplay.map((cme, idx) => (
+                <div key={idx} className="flare-card moderate">
                   <div className="flare-card-header">
-                    <h4 className="flare-class">Class {flare.classType || "?"}</h4>
-                    <span className={`severity ${severityClass}`}>
-                      {severityLabel}
+                    <h4>CME Event</h4>
+                    <span className="severity moderate">
+                      {cme.analysis?.speed > 1000 ? "High" :
+                       cme.analysis?.speed > 500 ? "Moderate" : "Low"}
                     </span>
                   </div>
                   <div className="flare-details">
-                    <div className="detail-group">
-                      <span className="detail-label">Peak:</span>
-                      <span className="detail-value">
-                        {flare.peakTime ? new Date(flare.peakTime).toUTCString() : "Unknown"}
-                      </span>
-                    </div>
-                    <div className="detail-group">
-                      <span className="detail-label">Location:</span>
-                      <span className="detail-value">{flare.sourceLocation || "NA"}</span>
-                    </div>
-                    <div className="detail-group">
-                      <span className="detail-label">Coordinates:</span>
-                      <span className="detail-value">
-                        {flare.lat !== null ? toDMS(flare.lat, true) : "Unknown"}, 
-                        {flare.lng !== null ? toDMS(flare.lng, false) : "Unknown"}
-                      </span>
-                    </div>
+                    <div><strong>Start:</strong> {new Date(cme.startTime).toUTCString()}</div>
+                    <div><strong>Speed:</strong> {Math.round(cme.analysis?.speed || 0)} km/s</div>
+                    <div><strong>Arrival:</strong> {cme.analysis?.arrivalTime || "?"}</div>
                   </div>
-                  <div className="flare-instruments">
-                    <span className="instruments-label">Detected by:</span>
-                    {flare.instruments?.map(i => i.displayName).join(", ") || "Unknown"}
-                  </div>
+                  <a href={cme.link} target="_blank" rel="noreferrer">🔗 CME Details</a>
                 </div>
-              );
-            })}
+              ))
+            ) : (
+              flaresToDisplay.map((flare, idx) => {
+                const severityClass = getSeverityClass(flare.classType);
+                const severityLabel = getSeverityLabel(flare.classType);
+                return (
+                  <div key={idx} className={`flare-card ${severityClass}`}>
+                    <div className="flare-card-header">
+                      <h4>{flare.classType || "Unknown"}</h4>
+                      <span className={`severity ${severityClass}`}>{severityLabel}</span>
+                    </div>
+                    <div className="flare-details">
+                      <div><strong>Peak:</strong> {new Date(flare.peakTime).toUTCString()}</div>
+                      <div><strong>Location:</strong> {toDMS(flare.lat, true)}, {toDMS(flare.lng, false)}</div>
+                      <div><strong>Source:</strong> {flare.source || "Unknown"}</div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </div>
-
     </div>
   );
 }
