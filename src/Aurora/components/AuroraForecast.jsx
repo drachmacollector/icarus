@@ -24,7 +24,7 @@ export default function AuroraForecast() {
 
         {showInfo && (
           <div className="aurora-info-panel">
-            <div className="info-header">
+            <div className="info-header-aurora">
               <h3>Aurora Forecast at a Glance</h3>
               <button 
                 className="close-info"

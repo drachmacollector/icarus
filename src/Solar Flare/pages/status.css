@@ -335,7 +335,7 @@ body {
 }
 
 /* Info Panel */
-.info-panel {
+.info-panel-status {
   flex: 1;
   display: flex;
   flex-direction: column;

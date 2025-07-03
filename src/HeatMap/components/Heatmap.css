@@ -134,15 +134,14 @@
   opacity: 1;
 }
 
-.info-header {
+.info-header-heatmap {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.8rem;
 }
 
-.info-header h3 {
-  margin-bottom: 6x;
+.info-header-heatmap h3 {
   font-size: 1rem;
   color: #a0b2ff;
   font-weight: 500;
