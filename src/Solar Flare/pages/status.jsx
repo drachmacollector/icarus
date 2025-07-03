@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
 import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "react-datepicker/dist/react-datepicker.css";
@@ -16,12 +15,7 @@ function toDMS(deg, isLat) {
   const minutesNotTruncated = (absolute - degrees) * 60;
   const minutes = Math.floor(minutesNotTruncated);
   const seconds = Math.floor((minutesNotTruncated - minutes) * 60);
-  let direction = "";
-  if (isLat) {
-    direction = deg >= 0 ? "N" : "S";
-  } else {
-    direction = deg >= 0 ? "E" : "W";
-  }
+  let direction = isLat ? (deg >= 0 ? "N" : "S") : (deg >= 0 ? "E" : "W");
   return `${degrees}°${minutes}'${seconds}" ${direction}`;
 }
 
@@ -86,29 +80,29 @@ export default function StatusPage() {
     return 1;
   };
 
+  const getCmeSeverityClass = (speed) => {
+    if (speed > 1000) return "major";
+    if (speed > 500) return "moderate";
+    return "minor";
+  };
+
+  const getCmeSeverityLabel = (speed) => {
+    if (speed > 1000) return "Major";
+    if (speed > 500) return "Moderate";
+    return "Minor";
+  };
+
   const flaresToDisplay = useMemo(() => {
     let result = showOnlyMapped ? flaresWithCoords : filteredFlares;
-    
-    // Apply sorting
     if (sortOrder === "severity-desc") {
-      return [...result].sort((a, b) => {
-        const severityA = getSeverityOrder(a.classType);
-        const severityB = getSeverityOrder(b.classType);
-        return severityB - severityA;
-      });
+      return [...result].sort((a, b) => getSeverityOrder(b.classType) - getSeverityOrder(a.classType));
     } else if (sortOrder === "severity-asc") {
-      return [...result].sort((a, b) => {
-        const severityA = getSeverityOrder(a.classType);
-        const severityB = getSeverityOrder(b.classType);
-        return severityA - severityB;
-      });
+      return [...result].sort((a, b) => getSeverityOrder(a.classType) - getSeverityOrder(b.classType));
     }
-    
     return result;
   }, [showOnlyMapped, filteredFlares, flaresWithCoords, sortOrder]);
 
   const cmesToDisplay = useMemo(() => cmes || [], [cmes]);
-
   const mapData = showCMEs ? cmesToDisplay : flaresToDisplay;
 
   return (
@@ -119,13 +113,11 @@ export default function StatusPage() {
             <h2 className="status-title">Solar Activity Command Center</h2>
           </div>
         </div>
-        
         <div className="notification-area">
           {(loading || loadingCMEs) && <div className="loading-notification">Loading data...</div>}
           {error && <div className="error-notification">{error}</div>}
           {errorCMEs && <div className="error-notification">{errorCMEs}</div>}
         </div>
-        
         <div className="controls-right">
           <div className="date-picker-group">
             <div className="date-label">Start Date</div>
@@ -139,7 +131,6 @@ export default function StatusPage() {
               className="datepicker"
             />
           </div>
-          
           <div className="date-picker-group">
             <label className="date-label">End Date</label>
             <DatePicker
@@ -152,7 +143,6 @@ export default function StatusPage() {
               className="datepicker"
             />
           </div>
-          
           <button className="reset-btn" onClick={resetDateRange}>
             Reset Range (Last 30 days)
           </button>
@@ -164,25 +154,13 @@ export default function StatusPage() {
           <div className="map-header">
             <h3>Solar Activity Map</h3>
             <div className="map-legend">
-              <div className="legend-item">
-                <div className="legend-color major"></div>
-                <span>X-Class (Major)</span>
-              </div>
-              <div className="legend-item">
-                <div className="legend-color moderate"></div>
-                <span>M-Class (Moderate)</span>
-              </div>
-              <div className="legend-item">
-                <div className="legend-color minor"></div>
-                <span>C-Class (Minor)</span>
-              </div>
-              <div className="legend-item">
-                <div className="legend-color mild"></div>
-                <span>B-Class (Mild)</span>
-              </div>
+              <div className="legend-item"><div className="legend-color major"></div><span>X-Class (Major)</span></div>
+              <div className="legend-item"><div className="legend-color moderate"></div><span>M-Class (Moderate)</span></div>
+              <div className="legend-item"><div className="legend-color minor"></div><span>C-Class (Minor)</span></div>
+              <div className="legend-item"><div className="legend-color mild"></div><span>B-Class (Mild)</span></div>
             </div>
           </div>
-          
+
           <MapContainer center={[0, 0]} zoom={2} scrollWheelZoom={false} className="flare-map">
             <TileLayer
               url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
@@ -191,19 +169,15 @@ export default function StatusPage() {
             {mapData.map((event, idx) => {
               if (event.lat !== null && event.lng !== null) {
                 if (showCMEs) {
+                  const severityClass = getCmeSeverityClass(event.analysis?.speed || 0);
+                  const color = severityClass === "major" ? "red" : severityClass === "moderate" ? "orange" : "green";
                   return (
                     <CircleMarker
                       key={idx}
                       center={[event.lat, event.lng]}
                       radius={6}
-                      color={
-                        event.analysis?.speed > 1000 ? "red" :
-                        event.analysis?.speed > 500 ? "orange" : "green"
-                      }
-                      fillColor={
-                        event.analysis?.speed > 1000 ? "red" :
-                        event.analysis?.speed > 500 ? "orange" : "green"
-                      }
+                      color={color}
+                      fillColor={color}
                       fillOpacity={0.5}
                     >
                       <Popup className="flare-popup">
@@ -215,25 +189,14 @@ export default function StatusPage() {
                   );
                 } else {
                   const severityClass = getSeverityClass(event.classType);
+                  const color = severityClass === "major" ? "red" : severityClass === "moderate" ? "orange" : severityClass === "minor" ? "green" : "gray";
                   return (
                     <CircleMarker
                       key={idx}
                       center={[event.lat, event.lng]}
-                      radius={
-                        severityClass === "major" ? 8 :
-                        severityClass === "moderate" ? 6 :
-                        severityClass === "minor" ? 5 : 4
-                      }
-                      color={
-                        severityClass === "major" ? "red" :
-                        severityClass === "moderate" ? "orange" :
-                        severityClass === "minor" ? "green" : "gray"
-                      }
-                      fillColor={
-                        severityClass === "major" ? "red" :
-                        severityClass === "moderate" ? "orange" :
-                        severityClass === "minor" ? "green" : "gray"
-                      }
+                      radius={severityClass === "major" ? 8 : severityClass === "moderate" ? 6 : severityClass === "minor" ? 5 : 4}
+                      color={color}
+                      fillColor={color}
                       fillOpacity={0.5}
                     >
                       <Popup className="flare-popup">
@@ -256,11 +219,7 @@ export default function StatusPage() {
             <div className="panel-controls-right">
               <div className="sort-control">
                 <label className="control-label">Sort by:</label>
-                <select 
-                  value={sortOrder} 
-                  onChange={(e) => setSortOrder(e.target.value)}
-                  className="sort-select"
-                >
+                <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className="sort-select">
                   <option value="default">Default</option>
                   <option value="severity-desc">Severity (High to Low)</option>
                   <option value="severity-asc">Severity (Low to High)</option>
@@ -268,7 +227,7 @@ export default function StatusPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="panel-controls">
             <div className="date-selector">
               <label className="control-label">Select Observation Date</label>
@@ -280,7 +239,6 @@ export default function StatusPage() {
                 className="datepicker"
               />
             </div>
-            
             <div className="location-toggle">
               <label className="toggle-label">
                 <input
@@ -294,7 +252,6 @@ export default function StatusPage() {
                 Show only flares with location data ({flaresWithCoords.length})
               </span>
             </div>
-
             <div className="location-toggle">
               <label className="toggle-label">
                 <input
@@ -304,85 +261,44 @@ export default function StatusPage() {
                 />
                 <span className="toggle-slider"></span>
               </label>
-              <span className="toggle-text">
-                Show CME activity
-              </span>
+              <span className="toggle-text">Show CME activity</span>
             </div>
           </div>
-          
+
           <div className="panel-stats">
             <div className="stats-header">Solar Flares</div>
-            <div className="stats-card">
-              <span className="stats-value">{flaresToDisplay.length}</span>
-              <span className="stats-label">Total</span>
-            </div>
-            <div className="stats-card major">
-              <span className="stats-value">
-                {flaresToDisplay.filter(f => getSeverityClass(f.classType) === "major").length}
-              </span>
-              <span className="stats-label">Major</span>
-            </div>
-            <div className="stats-card moderate">
-              <span className="stats-value">
-                {flaresToDisplay.filter(f => getSeverityClass(f.classType) === "moderate").length}
-              </span>
-              <span className="stats-label">Moderate</span>
-            </div>
-            <div className="stats-card minor">
-              <span className="stats-value">
-                {flaresToDisplay.filter(f => getSeverityClass(f.classType) === "minor").length}
-              </span>
-              <span className="stats-label">Minor</span>
-            </div>
-            <div className="stats-card mild">
-              <span className="stats-value">
-                {flaresToDisplay.filter(f => getSeverityClass(f.classType) === "mild").length}
-              </span>
-              <span className="stats-label">Mild</span>
-            </div>
+            <div className="stats-card"><span className="stats-value">{flaresToDisplay.length}</span><span className="stats-label">Total</span></div>
+            <div className="stats-card major"><span className="stats-value">{flaresToDisplay.filter(f => getSeverityClass(f.classType) === "major").length}</span><span className="stats-label">Major</span></div>
+            <div className="stats-card moderate"><span className="stats-value">{flaresToDisplay.filter(f => getSeverityClass(f.classType) === "moderate").length}</span><span className="stats-label">Moderate</span></div>
+            <div className="stats-card minor"><span className="stats-value">{flaresToDisplay.filter(f => getSeverityClass(f.classType) === "minor").length}</span><span className="stats-label">Minor</span></div>
+            <div className="stats-card mild"><span className="stats-value">{flaresToDisplay.filter(f => getSeverityClass(f.classType) === "mild").length}</span><span className="stats-label">Mild</span></div>
             <div className="stats-header">CMEs</div>
-            <div className="stats-card">
-              <span className="stats-value">{cmesToDisplay.length}</span>
-              <span className="stats-label">Total CMEs</span>
-            </div>
+            <div className="stats-card"><span className="stats-value">{cmesToDisplay.length}</span><span className="stats-label">Total CMEs</span></div>
           </div>
-          
+
           <div className="flare-grid">
             {showCMEs ? (
-              cmesToDisplay.map((cme, idx) => (
-                <div key={idx} className="flare-card moderate">
-                  <div className="flare-card-header">
-                    <h4 className="flare-class">CME Event</h4>
-                    <span className="severity moderate">
-                      {cme.analysis?.speed > 1000 ? "Major" :
-                       cme.analysis?.speed > 500 ? "Moderate" : "Minor"}
-                    </span>
-                  </div>
-                  <div className="flare-details">
-                    <div className="detail-group">
-                      <span className="detail-label">Start:</span>
-                      <span className="detail-value">
-                        {new Date(cme.startTime).toUTCString()}
-                      </span>
+              cmesToDisplay.map((cme, idx) => {
+                const speed = cme.analysis?.speed || 0;
+                const severityClass = getCmeSeverityClass(speed);
+                const severityLabel = getCmeSeverityLabel(speed);
+                return (
+                  <div key={idx} className={`flare-card ${severityClass}`}>
+                    <div className="flare-card-header">
+                      <h4 className="flare-class">CME Event</h4>
+                      <span className={`severity ${severityClass}`}>{severityLabel}</span>
                     </div>
-                    <div className="detail-group">
-                      <span className="detail-label">Speed:</span>
-                      <span className="detail-value">
-                        {Math.round(cme.analysis?.speed || 0)} km/s
-                      </span>
+                    <div className="flare-details">
+                      <div className="detail-group"><span className="detail-label">Start:</span><span className="detail-value">{new Date(cme.startTime).toUTCString()}</span></div>
+                      <div className="detail-group"><span className="detail-label">Speed:</span><span className="detail-value">{Math.round(speed)} km/s</span></div>
+                      <div className="detail-group"><span className="detail-label">Arrival:</span><span className="detail-value">{cme.analysis?.arrivalTime || "Unknown"}</span></div>
                     </div>
-                    <div className="detail-group">
-                      <span className="detail-label">Arrival:</span>
-                      <span className="detail-value">
-                        {cme.analysis?.arrivalTime || "Unknown"}
-                      </span>
+                    <div className="flare-instruments">
+                      <a href={cme.link} target="_blank" rel="noreferrer">🔗 CME Details</a>
                     </div>
                   </div>
-                  <div className="flare-instruments">
-                    <a href={cme.link} target="_blank" rel="noreferrer">🔗 CME Details</a>
-                  </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               flaresToDisplay.map((flare, idx) => {
                 const severityClass = getSeverityClass(flare.classType);
@@ -391,32 +307,15 @@ export default function StatusPage() {
                   <div key={idx} className={`flare-card ${severityClass}`}>
                     <div className="flare-card-header">
                       <h4 className="flare-class">Class {flare.classType || "?"}</h4>
-                      <span className={`severity ${severityClass}`}>
-                        {severityLabel}
-                      </span>
+                      <span className={`severity ${severityClass}`}>{severityLabel}</span>
                     </div>
                     <div className="flare-details">
-                      <div className="detail-group">
-                        <span className="detail-label">Peak:</span>
-                        <span className="detail-value">
-                          {flare.peakTime ? new Date(flare.peakTime).toUTCString() : "Unknown"}
-                        </span>
-                      </div>
-                      <div className="detail-group">
-                        <span className="detail-label">Location:</span>
-                        <span className="detail-value">{flare.sourceLocation || "NA"}</span>
-                      </div>
-                      <div className="detail-group">
-                        <span className="detail-label">Coordinates:</span>
-                        <span className="detail-value">
-                          {flare.lat !== null ? toDMS(flare.lat, true) : "Unknown"}, 
-                          {flare.lng !== null ? toDMS(flare.lng, false) : "Unknown"}
-                        </span>
-                      </div>
+                      <div className="detail-group"><span className="detail-label">Peak:</span><span className="detail-value">{flare.peakTime ? new Date(flare.peakTime).toUTCString() : "Unknown"}</span></div>
+                      <div className="detail-group"><span className="detail-label">Location:</span><span className="detail-value">{flare.sourceLocation || "NA"}</span></div>
+                      <div className="detail-group"><span className="detail-label">Coordinates:</span><span className="detail-value">{flare.lat !== null ? toDMS(flare.lat, true) : "Unknown"}, {flare.lng !== null ? toDMS(flare.lng, false) : "Unknown"}</span></div>
                     </div>
                     <div className="flare-instruments">
-                      <span className="instruments-label">Detected by:</span>
-                      {flare.instruments?.map(i => i.displayName).join(", ") || "Unknown"}
+                      <span className="instruments-label">Detected by:</span> {flare.instruments?.map(i => i.displayName).join(", ") || "Unknown"}
                     </div>
                   </div>
                 );
