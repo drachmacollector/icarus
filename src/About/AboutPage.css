@@ -169,3 +169,39 @@ border-color: #faf5f5;
   background: #16213e;
   transform: translateY(-3px);
 }
+
+.impact-section, .significance-section {
+  padding: 2rem;
+  max-width: 950px;
+  margin: auto;
+  margin-bottom: 2.5rem;
+  background: rgba(10, 10, 10, 0.95);
+  border-radius: 18px;
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.08);
+  color: #f0f0f0;
+  line-height: 1.8;
+  font-size: 1.05rem;
+}
+
+.impact-section h2, .significance-section h2 {
+  font-size: 2rem;
+  color: #00ffff;
+  margin-bottom: 1rem;
+}
+
+.impact-section ul, .significance-section ul {
+  padding-left: 1.5rem;
+}
+
+.impact-section li, .significance-section li {
+  margin-bottom: 1rem;
+}
+
+.impact-section a, .significance-section a {
+  color: #00e5ff;
+  text-decoration: none;
+}
+
+.impact-section a:hover, .significance-section a:hover {
+  text-decoration: underline;
+}
