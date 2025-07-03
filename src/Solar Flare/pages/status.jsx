@@ -81,10 +81,12 @@ export default function StatusPage() {
   };
 
   const getCmeSeverityClass = (speed) => {
-    if (speed > 1000) return "major";
-    if (speed > 500) return "moderate";
-    return "minor";
-  };
+  if (speed > 1000) return "major";
+  if (speed > 500) return "moderate";
+  if (speed > 0) return "minor";
+  return "mild";
+};
+
 
   const getCmeSeverityLabel = (speed) => {
     if (speed > 1000) return "Major";
@@ -266,15 +268,29 @@ export default function StatusPage() {
           </div>
 
           <div className="panel-stats">
-            <div className="stats-header">Solar Flares</div>
-            <div className="stats-card"><span className="stats-value">{flaresToDisplay.length}</span><span className="stats-label">Total</span></div>
-            <div className="stats-card major"><span className="stats-value">{flaresToDisplay.filter(f => getSeverityClass(f.classType) === "major").length}</span><span className="stats-label">Major</span></div>
-            <div className="stats-card moderate"><span className="stats-value">{flaresToDisplay.filter(f => getSeverityClass(f.classType) === "moderate").length}</span><span className="stats-label">Moderate</span></div>
-            <div className="stats-card minor"><span className="stats-value">{flaresToDisplay.filter(f => getSeverityClass(f.classType) === "minor").length}</span><span className="stats-label">Minor</span></div>
-            <div className="stats-card mild"><span className="stats-value">{flaresToDisplay.filter(f => getSeverityClass(f.classType) === "mild").length}</span><span className="stats-label">Mild</span></div>
-            <div className="stats-header">CMEs</div>
-            <div className="stats-card"><span className="stats-value">{cmesToDisplay.length}</span><span className="stats-label">Total CMEs</span></div>
-          </div>
+  <div className="stats-header">{showCMEs ? "CME Events" : "Solar Flares"}</div>
+
+  <div className="stats-card">
+    <span className="stats-value">
+      {showCMEs ? cmesToDisplay.length : flaresToDisplay.length}
+    </span>
+    <span className="stats-label">Total</span>
+  </div>
+
+  {["major", "moderate", "minor", "mild"].map(severity => {
+    const count = showCMEs
+      ? cmesToDisplay.filter(cme => getCmeSeverityClass(cme.analysis?.speed || 0) === severity).length
+      : flaresToDisplay.filter(flare => getSeverityClass(flare.classType) === severity).length;
+
+    return (
+      <div key={severity} className={`stats-card ${severity}`}>
+        <span className="stats-value">{count}</span>
+        <span className="stats-label">{severity.charAt(0).toUpperCase() + severity.slice(1)}</span>
+      </div>
+    );
+  })}
+</div>
+
 
           <div className="flare-grid">
             {showCMEs ? (
