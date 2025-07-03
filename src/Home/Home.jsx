@@ -9,7 +9,8 @@ const Home = () => {
       </video>
 
       <div className="overlay-content">
-        <h1>Planet <br /> Earth</h1>
+        <h1>Icarus</h1>
+        <p>Mapping solar fury & auroral beauty across the Earth's skies</p>
       </div>
       
     </div>

@@ -29,11 +29,11 @@
 }
 
 .nav-link {
-  color: rgba(200, 220, 255, 0.8);
+  color: rgb(200, 220, 255);
   text-decoration: none;
   font-family: 'Montserrat', sans-serif;
   font-weight: 400;
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 1.5px;
   padding: 0.7rem 1.5rem;
