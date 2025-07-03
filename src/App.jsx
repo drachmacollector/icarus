@@ -7,7 +7,7 @@ import Navbar from "./Navbar/Navbar";
 import RiskPage from "./Solar Flare/pages/risk";
 import AnalysisPage from "./Analysis/Analysis";
 import CmeTracker from './CME/components/CmeTracker';
-import News from './news/News'; 
+import News from './News/News'; 
 import AuroraForecast from './Aurora/components/AuroraForecast';
 import HeatMapGlobe from './HeatMap/components/HeatMapGlobe';
 import HeatMapDashboard from './HeatMap/components/HeatMapDashboard';
