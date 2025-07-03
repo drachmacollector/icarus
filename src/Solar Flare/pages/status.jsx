@@ -102,13 +102,15 @@ export default function StatusPage() {
 
   return (
     <div className="status-container">
-      <div className="header-section">
-        <div className="title-container">
-          <h2 className="status-title">Solar Flare Command Center</h2>
-        </div>
-      </div>
 
-        <div className="date-range-controls">
+
+        <div className="title-date-controls">
+          <div className="header-section">
+            <div className="title-container">
+              <h2 className="status-title">Solar Flare Command Center</h2>
+            </div>
+          </div>
+          
           <div className="notification-area">
             {loading && <div className="loading-notification">Loading flare data...</div>}
             {error && <div className="error-notification">{error}</div>}
@@ -332,36 +334,6 @@ export default function StatusPage() {
           </div>
         </div>
       </div>
-
-{/* ✅ Stylish Home Button (Bottom Left Floating) */}
-<Link to="/" style={{ position: 'fixed', bottom: '1rem', left: '1rem', zIndex: 1000 }}>
-  <button
-    style={{
-      padding: '0.5rem 1.2rem',
-      fontSize: '1rem',
-      fontWeight: 'bold',
-      color: '#fff',
-      background: 'rgba(255, 255, 255, 0.1)',
-      border: '1px solid rgba(255, 255, 255, 0.2)',
-      borderRadius: '12px',
-      backdropFilter: 'blur(10px)',
-      WebkitBackdropFilter: 'blur(10px)',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-      cursor: 'pointer',
-      transition: '0.3s ease',
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.transform = 'scale(1.05)';
-      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.transform = 'scale(1)';
-      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-    }}
-  >
-    🌞 Flares
-  </button>
-</Link>
 
     </div>
   );
