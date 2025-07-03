@@ -13,6 +13,8 @@ import HeatMapGlobe from './HeatMap/components/HeatMapGlobe';
 import HeatMapDashboard from './HeatMap/components/HeatMapDashboard';
 import Timeline from "./timeline/Timeline";
 import Home from "./home/Home";
+import AboutPage from './About/AboutPage';
+
 
 import './App.css'; // 
 
@@ -40,6 +42,7 @@ export default function App() {
           <Route path="/AuroraForecast" element={<AuroraForecast />} />
           <Route path="/HeatMapDashboard" element={<HeatMapDashboard />} />
           <Route path="/timeline" element={<Timeline />} />
+          <Route path="/AboutPage" element={<AboutPage />} />
         </Routes>
       </div>
     </Router>
