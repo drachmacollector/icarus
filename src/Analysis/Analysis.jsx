@@ -6,7 +6,7 @@ import "./Analysis.css";
 import DatePicker from "react-datepicker";
 import { format } from "date-fns";
 import useFlareData from "../Solar Flare/hooks/useFlareData";
-import useCmeData from "../cme/hooks/useCmeData";
+import useCmeData from "../CME/hooks/useCmeData";
 
 function toDMS(deg, isLat) {
   if (deg === null || deg === undefined) return "Unknown";
