@@ -25,20 +25,27 @@ export default function CmeTracker() {
         pointLat={d => d.lat}
         pointLng={d => d.lng}
 
-        // Color by severity
-        pointColor={d =>
-          d.analysis.speed > 1000 ? 'red' : 'orange'
-        }
+// Color by severity
+pointColor={d =>
+  d.analysis.speed > 1000 ? 'red' :
+  d.analysis.speed > 500 ? 'yellow' :
+  'green'
+}
 
-        // Taller rods for high‐impact
-        pointAltitude={d =>
-          d.analysis.speed > 1000 ? 0.2 : 0.1
-        }
+// Rod height by severity
+pointAltitude={d =>
+  d.analysis.speed > 1000 ? 0.2 :
+  d.analysis.speed > 500 ? 0.1 :
+  0.05
+}
 
-        // Slightly thicker rods for high‐impact
-        pointRadius={d =>
-          d.analysis.speed > 1000 ? 0.5 : 0.3
-        }
+// Rod thickness by severity
+pointRadius={d =>
+  d.analysis.speed > 1000 ? 0.5 :
+  d.analysis.speed > 500 ? 0.3 :
+  0.2
+}
+
 
         onPointClick={setSelected}
       />
