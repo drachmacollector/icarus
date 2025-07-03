@@ -89,7 +89,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-.info-header {
+.info-header-aurora {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -98,7 +98,7 @@
   border-bottom: 1px solid rgba(50, 100, 150, 0.2);
 }
 
-.info-header h3 {
+.info-header-aurora h3 {
   margin: 0;
   font-size: 1rem;
   color: #fe4f4f;

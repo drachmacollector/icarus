@@ -20,11 +20,14 @@ export default function Navbar() {
   <Link to="/CmeTracker" className={`nav-link ${location.pathname === "/CmeTracker" ? "active" : ""}`}>
     Coronal Mass Ejections (CME)
   </Link>
+  <Link to="/Status" className={`nav-link ${location.pathname === "/Status" ? "active" : ""}`}>
+    Status
+  </Link>
   <Link to="/HeatMapDashboard" className={`nav-link ${location.pathname === "/HeatMapDashboard" ? "active" : ""}`}>
     Heat Map
   </Link>
   <Link to="/AuroraForecast" className={`nav-link ${location.pathname === "/risk" ? "active" : ""}`}>
-    Aurora
+    Auroras
   </Link>
   <Link to="/Timeline" className={`nav-link ${location.pathname === "/Timeline" ? "active" : ""}`}>
     Timeline

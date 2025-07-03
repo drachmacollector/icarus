@@ -250,7 +250,7 @@ export default function StatusPage() {
           </MapContainer>
         </div>
 
-        <div className="info-panel">
+        <div className="info-panel-status">
           <div className="panel-header">
             <h3>Flare Analysis</h3>
             <div className="panel-controls-right">

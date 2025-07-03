@@ -1,5 +1,4 @@
 // src/Solar Flare/components/GlobeVisualizer.jsx
-
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
 import Globe from 'react-globe.gl';
@@ -9,7 +8,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { computeSubsolarPoint } from '../utils/geoUtils';
 import useFlareData from "../hooks/useFlareData";
 import { format } from 'date-fns';
-import './Globe.css';
+import './Globe.css'; // Updated CSS import
 
 export default function GlobeVisualizer({
   cityData = [],
@@ -31,7 +30,7 @@ export default function GlobeVisualizer({
     endDate:   endDate   ? format(endDate,   "yyyy-MM-dd") : undefined
   });
 
-  // Hemisphere mesh (unchanged)
+  // Hemisphere mesh
   const hemiMeshRef = useRef();
   useEffect(() => {
     if (!hemiMeshRef.current) {
@@ -52,7 +51,7 @@ export default function GlobeVisualizer({
     }
   }, [autoRotate]);
 
-  // Subsolar shading (unchanged)
+  // Subsolar shading
   useEffect(() => {
     const now = new Date();
     const pt  = computeSubsolarPoint(now);
@@ -80,8 +79,7 @@ export default function GlobeVisualizer({
 
   // Build rods as pointsData
   const pointsData = filtered.map(f => {
-    const cls = f.classType[0]; // 'X','M','C', etc.
-    // define color, length, radius by class
+    const cls = f.classType[0];
     let color='green', altitude=0.05, radius=0.2;
     if (cls==='X') { color='red';     altitude=0.3; radius=0.5; }
     else if (cls==='M'){ color='yellow'; altitude=0.2; radius=0.4; }
@@ -100,15 +98,9 @@ export default function GlobeVisualizer({
   return (
     <div className="globe-container">
       <div className="controls-container">
-        <button
-          className="control-button"
-          onClick={() => navigate('/status')}
-        >
-          📊 Status Page
-        </button>
 
-        <div>
-          <label>📅 Exact Date:</label>
+        <div className="control-group">
+          <label>📅 Exact Date</label>
           <DatePicker
             selected={selectedDate}
             onChange={d => {
@@ -121,27 +113,29 @@ export default function GlobeVisualizer({
           />
         </div>
 
-        <div>
-          <label>⏱ Date Range:</label>
-          <DatePicker
-            selected={startDate}
-            onChange={setStartDate}
-            selectsStart startDate={startDate} endDate={endDate}
-            dateFormat="yyyy-MM-dd"
-            placeholderText="Start"
-          />
-          <DatePicker
-            selected={endDate}
-            onChange={setEndDate}
-            selectsEnd   startDate={startDate} endDate={endDate}
-            minDate={startDate}
-            dateFormat="yyyy-MM-dd"
-            placeholderText="End"
-          />
+        <div className="control-group">
+          <label>⏱ Date Range</label>
+          <div className="date-picker-group">
+            <DatePicker
+              selected={startDate}
+              onChange={setStartDate}
+              selectsStart startDate={startDate} endDate={endDate}
+              dateFormat="yyyy-MM-dd"
+              placeholderText="Start"
+            />
+            <DatePicker
+              selected={endDate}
+              onChange={setEndDate}
+              selectsEnd startDate={startDate} endDate={endDate}
+              minDate={startDate}
+              dateFormat="yyyy-MM-dd"
+              placeholderText="End"
+            />
+          </div>
         </div>
 
-        <div>
-          <label>☀️ Flare Class:</label>
+        <div className="control-group">
+          <label>☀️ Flare Class</label>
           <select
             value={selectedClass}
             onChange={e => setSelectedClass(e.target.value)}
@@ -154,15 +148,65 @@ export default function GlobeVisualizer({
         </div>
       </div>
 
+      <div className="top-buttons">
+        <button 
+          onClick={() => setAutoRotate(prev => !prev)} 
+          className="control-button"
+        >
+          {autoRotate ? '⏸ Pause Rotation' : '▶ Resume Rotation'}
+        </button>
+      </div>
+
+      <div className="info-panel-flares">
+        <div className="info-header-flares">
+          <h3>Solar Flares at a Glance</h3>
+        </div>
+        
+        <div className="info-section">
+          <div className="info-title">What They Are</div>
+          <div className="info-content">
+            Intense bursts of X‑ray and extreme ultraviolet radiation from the Sun’s magnetic active regions.
+          </div>
+        </div>
+        
+        <div className="info-section">
+          <div className="info-title">Classification</div>
+          <div className="info-content">
+            C‑class (minor), M‑class (medium), X‑class (major); each step is 10× more powerful.
+          </div>
+        </div>
+        
+        <div className="info-section">
+          <div className="info-title">Frequency</div>
+          <div className="info-content">
+            During Solar Cycle peaks, you’ll see ~200 M‑class and ~10 X‑class flares per year.
+          </div>
+        </div>
+        
+        <div className="info-section">
+          <div className="info-title">Communications Impact</div>
+          <div className="info-content">
+            M‑class flares cause brief, localized HF‑band “fades”; X‑class flares trigger widespread blackout across the entire sunlit hemisphere.
+          </div>
+        </div>
+        
+        <div className="info-section">
+          <div className="info-title">Energy Scale</div>
+          <div className="info-content">
+            An X1.0 flare releases ~10²⁵ joules—equivalent to billions of Hiroshima bombs.
+          </div>
+        </div>
+      </div>
+
       <Globe
         ref={globeEl}
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
+        backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png" 
         backgroundColor="#000000"
         showAtmosphere
         atmosphereColor="blue"
         atmosphereAltitude={0.25}
 
-        // rods as pointsData
         pointsData={pointsData}
         pointLat="lat"
         pointLng="lng"
@@ -171,7 +215,6 @@ export default function GlobeVisualizer({
         pointRadius="radius"
         onPointClick={p => alert(`Flare ${p.flare.classType} at ${p.flare.peakTime}`)}
 
-        // Subsolar hemisphere shading
         customLayerData={[subsolar]}
         customThreeObject={() => hemiMeshRef.current}
         customThreeObjectUpdate={(obj, { lat, lng }) => {
@@ -184,8 +227,8 @@ export default function GlobeVisualizer({
         }}
       />
 
-      {loading && <div className="loading-overlay">Loading flares…</div>}
-      {error   && <div className="error-overlay">Error loading data</div>}
+      {loading && <div className="loading-overlay">Loading solar flare data...</div>}
+      {error   && <div className="error-overlay">⚠️ Error loading flare data</div>}
     </div>
   );
 }

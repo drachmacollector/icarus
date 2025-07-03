@@ -110,7 +110,7 @@ export default function HeatMapDashboard() {
 
       {/* === Information Panel - Made smaller and more subtle === */}
       <div className="heatmap-info-panel" ref={infoPanelRef}>
-        <div className="info-header">
+        <div className="info-header-heatmap">
           <h3>Understanding the Heatmap</h3>
           <button 
             className="close-info"
