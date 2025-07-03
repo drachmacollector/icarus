@@ -1,122 +1,171 @@
 .about-container {
-  font-family: Arial, sans-serif;
-  color: #ffffff;
-  background: linear-gradient(to bottom, #000000, #0f1b2a);
-  padding: 40px 20px;
-  position: relative;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: auto;
+  font-family: 'Segoe UI', sans-serif;
 }
 
 .hero {
   text-align: center;
-  margin-bottom: 60px;
+  margin-bottom: 3rem;
 }
 
 .hero h1 {
   font-size: 2.5rem;
-  color: #ffcc00;
+  color: #ffffff;
 }
 
 .hero p {
-  font-size: 1.1rem;
-  color: #ccc;
-  max-width: 800px;
-  margin: 20px auto 0;
+  font-size: 1.2rem;
+  color: #faf5f5;
 }
 
 .feature {
   display: flex;
-  align-items: flex-start;
-  gap: 20px;
-  margin: 30px auto;
-  max-width: 900px;
-  border-bottom: 1px solid #333;
-  padding-bottom: 20px;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  align-items: center;
+  background: #06080a;
+  padding: 1rem;
+  border-radius: 12px;
 }
 
 .feature .icon {
-  font-size: 2.5rem;
-  color: #ffcc00;
-  min-width: 50px;
+  font-size: 2rem;
+  color: #1c88ff;
 }
 
 .feature h2 {
-  font-size: 1.5rem;
-  margin: 0;
-  color: #fff;
-}
-
-.feature p {
-  color: #ccc;
-  font-size: 1rem;
-  margin-top: 10px;
+  margin: 0 0 0.3rem 0;
 }
 
 .api-line {
-  font-size: 0.9rem;
-  color: #88f7ff;
-  margin-top: 6px;
-}
-
-.explain-section {
-  background: #111;
-  padding: 40px 20px;
-  margin-top: 60px;
-  border-radius: 12px;
-  max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.explain-section h2 {
-  color: #ffcc00;
-  margin-bottom: 20px;
-}
-
-.explain-section ul {
-  list-style: disc;
-  padding-left: 20px;
-  color: #ccc;
-  line-height: 1.7;
-}
-
-.explain-section li strong {
-  color: #fff;
-}
-
-.explain-section a {
-  color: #44d9ff;
-  text-decoration: none;
-  margin-left: 5px;
-}
-
-.explain-section a:hover {
-  text-decoration: underline;
-}
-
-.footer {
-  text-align: center;
-  margin-top: 80px;
   color: #888;
   font-size: 0.9rem;
 }
 
-/* Scroll to Top Button */
+.explain-section {
+  margin-top: 4rem;
+}
+
+.explain-section ul {
+  padding-left: 1rem;
+}
+
+.explain-section li {
+  margin-bottom: 1rem;
+}
+
+.unique-section {
+  margin-bottom: 3rem;
+}
+
+.unique-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.unique-item {
+  background: #000210;
+  padding: 1rem;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.unique-item .icon {
+  font-size: 2rem;
+  color: #2962ff;
+  margin-bottom: 0.5rem;
+}
+
 .scroll-to-top {
   position: fixed;
   bottom: 30px;
   right: 30px;
-  background: #ffcc00;
+  background-color: #007bff;
+  color: white;
   border: none;
-  padding: 12px;
+  padding: 0.6rem;
   border-radius: 50%;
   cursor: pointer;
   font-size: 1.2rem;
-  color: #000;
-  box-shadow: 0 0 15px #ffcc00;
-  transition: transform 0.2s ease-in-out;
-  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.footer {
+  text-align: center;
+  margin-top: 4rem;
+  padding-top: 2rem;
+  font-size: 0.9rem;
+  color: #888;
+}
+.explain-section{
+background-color: #000210;
+border-color: #faf5f5;
+}
+
+.scroll-down-arrow {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.chevron {
+  font-size: 2rem;
+  color: #007bff;
+  animation: bounce 1.8s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(12px);
+  }
+  60% {
+    transform: translateY(8px);
+  }
+}
+
+
+/* AboutPage.css */
+.about-container {
+  /* Your existing styles */
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure content is above cursor trail */
+.hero, 
+.unique-section, 
+.feature, 
+.explain-section, 
+.footer {
+  position: relative;
+  z-index: 2;
+}
+
+.scroll-to-top {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #1a1a2e;
+  color: white;
+  border: none;
+  cursor: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
 }
 
 .scroll-to-top:hover {
-  transform: scale(1.1);
+  background: #16213e;
+  transform: translateY(-3px);
 }
