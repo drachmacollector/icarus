@@ -7,10 +7,8 @@ import * as THREE from 'three';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { computeSubsolarPoint } from '../utils/geoUtils';
-import HeatMapDashboard from '../../HeatMap/components/HeatMapDashboard';
 import CmeTracker from '../../CME/components/CmeTracker';
 import './Globe.css';
-
 
 export default function GlobeVisualizer({
   flares,
@@ -18,6 +16,7 @@ export default function GlobeVisualizer({
   cityData = [],
   heatmapData = []
 }) {
+  const location = useLocation();
   const globeEl = useRef();
   const [subsolar, setSubsolar] = useState({ lat: 0, lng: 0 });
   const [hemisphereRGB, setHemisphereRGB] = useState('navy');
@@ -84,14 +83,29 @@ export default function GlobeVisualizer({
     hemiMeshRef.current.material.needsUpdate = true;
   }, [currentTime, flares]);
 
-  const selectedDateStr = selectedDate ? selectedDate.toISOString().slice(0, 10) : null;
+  const isSameDay = (d1, d2) =>
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate();
+
+  const normalizeDate = (date) => {
+    if (!date) return null;
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  };
+
+  const normSelected = normalizeDate(selectedDate);
+  const normStart = normalizeDate(startDate);
+  const normEnd = normalizeDate(endDate);
 
   const filteredFlares = flares.filter(f => {
     const flareDate = new Date(f.peakTime);
-    if (selectedDate && f.peakTime.slice(0, 10) !== selectedDateStr) return false;
-    if (startDate && flareDate < startDate) return false;
-    if (endDate && flareDate > endDate) return false;
-    if (selectedClass !== 'All' && f.classType !== selectedClass) return false;
+    const normFlareDate = normalizeDate(flareDate);
+
+    if (selectedDate && !isSameDay(normFlareDate, normSelected)) return false;
+    if (startDate && normFlareDate < normStart) return false;
+    if (endDate && normFlareDate > normEnd) return false;
+    if (selectedClass !== 'All' && selectedClass !== 'B' && f.classType !== selectedClass) return false;
+
     return true;
   });
 
@@ -99,7 +113,7 @@ export default function GlobeVisualizer({
     lat: f.lat,
     lng: f.lng,
     size: f.size || 0.3,
-    color: f.classType === 'X' ? 'red' : f.classType === 'M' ? 'orange' : 'green',
+    color: f.classType === 'X' ? 'red' : f.classType === 'M' ? 'orange' : 'yellow',
     flare: f
   }));
 
@@ -113,19 +127,19 @@ export default function GlobeVisualizer({
   }));
 
   const filteredHeatmap = heatmapData.filter(d => {
-    const dataDate = new Date(d.date);
-    if (selectedDate && d.date.slice(0, 10) !== selectedDateStr) return false;
-    if (startDate && dataDate < startDate) return false;
-    if (endDate && dataDate > endDate) return false;
+    const dataDate = normalizeDate(new Date(d.date));
+    if (selectedDate && !isSameDay(dataDate, normSelected)) return false;
+    if (startDate && dataDate < normStart) return false;
+    if (endDate && dataDate > normEnd) return false;
     return true;
   });
 
   const heatPoints = filteredHeatmap.map(d => {
     const intensity = Math.max(0, Math.min(1, d.intensity ?? 0));
-    let color = 'green';
+    let color = 'yellow';
     if (intensity > 0.75) color = 'red';
     else if (intensity > 0.5) color = 'orange';
-    else if (intensity > 0.25) color = 'yellow';
+    else if (intensity > 0) color = 'green';
 
     return {
       lat: d.lat,
@@ -136,16 +150,13 @@ export default function GlobeVisualizer({
   });
 
   return (
-    <>
     <div style={{ position: 'relative', height: '100%', width: '100%' }}>
       {showMode === 'flares' && (
         <div className="controls-container">
           <div>
             <label>📅 Filter by exact date:</label>
             <DatePicker
-              color="black"
               className="datepicker-input"
-              style={{ width: '100%' }}
               selected={selectedDate}
               onChange={setSelectedDate}
               dateFormat="yyyy-MM-dd"
@@ -158,31 +169,17 @@ export default function GlobeVisualizer({
           <div>
             <label>⏱ Filter by date range:</label>
             <DatePicker
+              selectsRange
               className="datepicker-input"
-              style={{ width: '100%' }}
-              color="black"
-              selectsRange
-              selected={startDate}
-              onChange={setStartDate}
-              selectsStart
               startDate={startDate}
               endDate={endDate}
+              onChange={(update) => {
+                setStartDate(update[0]);
+                setEndDate(update[1]);
+              }}
+              isClearable
               dateFormat="yyyy-MM-dd"
-              placeholderText="Start date"
-              maxDate={new Date()}
-            />
-            <DatePicker
-            className="datepicker-input"
-              style={{ width: '100%' }}
-              color="black"
-              selectsRange
-              selected={endDate}
-              onChange={setEndDate}
-              selectsEnd
-              startDate={startDate}
-              endDate={endDate}
-              dateFormat="yyyy-MM-dd"
-              placeholderText="End date"
+              placeholderText="Select date range"
               maxDate={new Date()}
             />
           </div>
@@ -194,12 +191,12 @@ export default function GlobeVisualizer({
               <option value="X">X (Major)</option>
               <option value="M">M (Moderate)</option>
               <option value="C">C (Minor)</option>
-              <option value="C">B (Mild)</option>
+              <option value="B">B (Mild)</option>
             </select>
           </div>
         </div>
-        
       )}
+
       {showMode === 'flares' && (
         <Globe
           ref={globeEl}
@@ -209,7 +206,6 @@ export default function GlobeVisualizer({
           atmosphereColor="blue"
           atmosphereAltitude={0.25}
           backgroundColor="#000000"
-
           labelsData={flarePoints}
           labelLat="lat"
           labelLng="lng"
@@ -218,7 +214,6 @@ export default function GlobeVisualizer({
           labelColor="color"
           labelAltitude={0.02}
           onLabelClick={p => alert(`Flare ${p.flare.classType} peaked at ${p.flare.peakTime}`)}
-
           arcsData={flareArcs}
           arcStartLat="startLat"
           arcStartLng="startLng"
@@ -230,7 +225,6 @@ export default function GlobeVisualizer({
           arcStroke={1.2}
           arcAltitude={0.3}
           onArcClick={a => alert(`Flare ${a.flare.classType} peaked at ${a.flare.peakTime}`)}
-
           customLayerData={[subsolar]}
           customThreeObject={() => hemiMeshRef.current}
           customThreeObjectUpdate={(obj, { lat, lng }) => {
@@ -263,7 +257,7 @@ export default function GlobeVisualizer({
       )}
 
       {showMode === 'cme' && (
-        <CmeTracker selectedDate={selectedDateStr} />
+        <CmeTracker selectedDate={selectedDate ? selectedDate.toISOString().slice(0, 10) : null} />
       )}
 
       <div className="top-buttons">
@@ -272,14 +266,13 @@ export default function GlobeVisualizer({
             {autoRotate ? '⏸ Pause Rotation' : '▶ Resume Rotation'}
           </button>
         )}
-              <Link
-                to="/status"
-                className={`nav-link ${location.pathname === "/status" ? "active" : ""}`}
-              >
-                🗺️ Status Map
-              </Link>
+        <Link
+          to="/status"
+          className={`nav-link ${location.pathname === "/status" ? "active" : ""}`}
+        >
+          🗺️ Status Map
+        </Link>
       </div>
     </div>
-    </>
   );
 }
