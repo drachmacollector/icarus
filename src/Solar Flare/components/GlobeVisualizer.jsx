@@ -8,6 +8,8 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { computeSubsolarPoint } from '../utils/geoUtils';
 import CmeTracker from '../../CME/components/CmeTracker';
+import useFlareData from "../hooks/useFlareData";
+import { format } from 'date-fns';
 import './Globe.css';
 
 export default function GlobeVisualizer({
@@ -36,6 +38,11 @@ export default function GlobeVisualizer({
     navy: '0,0,128',
   };
 
+  const { flares: fetchedFlares, loading, error } = useFlareData({
+    startDate: startDate ? format(startDate, "yyyy-MM-dd") : undefined,
+    endDate: endDate ? format(endDate, "yyyy-MM-dd") : undefined
+  });
+
   const hemiMeshRef = useRef();
   if (!hemiMeshRef.current) {
     const geom = new THREE.SphereGeometry(1.01, 75, 75, 0, Math.PI);
@@ -59,9 +66,10 @@ export default function GlobeVisualizer({
     const pt = computeSubsolarPoint(currentTime);
     setSubsolar(pt);
 
-    const worst = flares.reduce((acc, f) => {
+    const worst = fetchedFlares.reduce((acc, f) => {
       if (f.classType?.startsWith('X')) return 'X';
       if (f.classType?.startsWith('M') && acc !== 'X') return 'M';
+      if (f.classType?.startsWith('C') && !['X', 'M'].includes(acc)) return 'C';
       return acc;
     }, null);
 
@@ -81,7 +89,7 @@ export default function GlobeVisualizer({
     hemiMeshRef.current.material.color.set(`rgb(${rgbMap[rgbColor]})`);
     hemiMeshRef.current.material.opacity = opacity;
     hemiMeshRef.current.material.needsUpdate = true;
-  }, [currentTime, flares]);
+  }, [currentTime, fetchedFlares]);
 
   const isSameDay = (d1, d2) =>
     d1.getFullYear() === d2.getFullYear() &&
@@ -106,7 +114,7 @@ export default function GlobeVisualizer({
     return true;
   };
 
-  const filteredFlares = flares.filter(f => {
+  const filteredFlares = fetchedFlares.filter(f => {
     const flareDate = normalizeDate(new Date(f.peakTime));
     if (!isInRange(flareDate)) return false;
     if (selectedClass !== 'All' && !f.classType?.startsWith(selectedClass)) return false;
@@ -182,19 +190,26 @@ export default function GlobeVisualizer({
           <div>
             <label>⏱ Filter by date range:</label>
             <DatePicker
-              selectsRange
-              className="datepicker-input"
-              startDate={startDate}
-              endDate={endDate}
-              onChange={(update) => {
-                setStartDate(update[0]);
-                setEndDate(update[1]);
-                setSelectedDate(null);
-              }}
-              isClearable
+              selected={startDate}
+              onChange={setStartDate}
               dateFormat="yyyy-MM-dd"
-              placeholderText="Select date range"
               maxDate={new Date()}
+              minDate={new Date("2010-01-01")}
+              placeholderText="Start Date"
+              className="datepicker"
+            />
+          </div>
+
+          <div className="date-picker-group">
+            <label className="date-label">End Date</label>
+            <DatePicker
+              selected={endDate}
+              onChange={setEndDate}
+              dateFormat="yyyy-MM-dd"
+              maxDate={new Date()}
+              minDate={startDate || new Date("2010-01-01")}
+              placeholderText="End Date"
+              className="datepicker"
             />
           </div>
 
@@ -202,9 +217,9 @@ export default function GlobeVisualizer({
             <label>☀️ Filter by flare class:</label>
             <select value={selectedClass} onChange={e => setSelectedClass(e.target.value)}>
               <option value="All">All</option>
-              <option value="X" style={{ color: 'red' }}>X (Major)</option>
-              <option value="M" style={{ color: 'orange' }}>M (Moderate)</option>
-              <option value="C" style={{ color: 'green' }}>C (Minor)</option>
+              <option value="X">X (Major)</option>
+              <option value="M">M (Moderate)</option>
+              <option value="C">C (Minor)</option>
             </select>
           </div>
         </div>
