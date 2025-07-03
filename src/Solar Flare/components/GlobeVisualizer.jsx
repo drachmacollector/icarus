@@ -7,8 +7,9 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { computeSubsolarPoint } from '../utils/geoUtils';
 import useFlareData from "../hooks/useFlareData";
+import RiskDashboard from "../components/RiskDashboard";
 import { format } from 'date-fns';
-import './Globe.css'; // Updated CSS import
+import './Globe.css';
 
 export default function GlobeVisualizer({
   cityData = [],
@@ -20,14 +21,15 @@ export default function GlobeVisualizer({
   const [subsolar, setSubsolar] = useState({ lat: 0, lng: 0 });
   const [autoRotate, setAutoRotate] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [startDate, setStartDate]       = useState(null);
-  const [endDate, setEndDate]           = useState(null);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [selectedClass, setSelectedClass] = useState('All');
+  const [showRiskPanel, setShowRiskPanel] = useState(false);
 
   // Fetch flares
   const { flares: fetchedFlares, loading, error } = useFlareData({
     startDate: startDate ? format(startDate, "yyyy-MM-dd") : undefined,
-    endDate:   endDate   ? format(endDate,   "yyyy-MM-dd") : undefined
+    endDate: endDate ? format(endDate, "yyyy-MM-dd") : undefined
   });
 
   // Hemisphere mesh
@@ -35,8 +37,10 @@ export default function GlobeVisualizer({
   useEffect(() => {
     if (!hemiMeshRef.current) {
       const geom = new THREE.SphereGeometry(1.01, 75, 75, 0, Math.PI);
-      const mat  = new THREE.MeshBasicMaterial({
-        color: 'rgba(0,0,128,0.75)', side: THREE.DoubleSide, transparent: true
+      const mat = new THREE.MeshBasicMaterial({
+        color: 'rgba(0,0,128,0.75)',
+        side: THREE.DoubleSide,
+        transparent: true
       });
       hemiMeshRef.current = new THREE.Mesh(geom, mat);
     }
@@ -54,13 +58,12 @@ export default function GlobeVisualizer({
   // Subsolar shading
   useEffect(() => {
     const now = new Date();
-    const pt  = computeSubsolarPoint(now);
+    const pt = computeSubsolarPoint(now);
     setSubsolar(pt);
   }, [fetchedFlares, selectedDate]);
 
-  // Filter by date/class
   const normalize = d => d && new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const isSameDay = (a,b) => a && b && a.getTime()===b.getTime();
+  const isSameDay = (a, b) => a && b && a.getTime() === b.getTime();
   const inRange = date => {
     const d = normalize(new Date(date));
     if (selectedDate) return isSameDay(d, normalize(selectedDate));
@@ -73,17 +76,16 @@ export default function GlobeVisualizer({
 
   const filtered = fetchedFlares.filter(f => {
     if (!inRange(f.peakTime)) return false;
-    if (selectedClass!=='All' && !f.classType.startsWith(selectedClass)) return false;
-    return f.lat!=null;
+    if (selectedClass !== 'All' && !f.classType.startsWith(selectedClass)) return false;
+    return f.lat != null;
   });
 
-  // Build rods as pointsData
   const pointsData = filtered.map(f => {
     const cls = f.classType[0];
-    let color='green', altitude=0.05, radius=0.2;
-    if (cls==='X') { color='red';     altitude=0.3; radius=0.5; }
-    else if (cls==='M'){ color='yellow'; altitude=0.2; radius=0.4; }
-    else if (cls==='C'){ color='greenyellow'; altitude=0.1; radius=0.3; }
+    let color = 'green', altitude = 0.05, radius = 0.2;
+    if (cls === 'X') { color = 'red'; altitude = 0.3; radius = 0.5; }
+    else if (cls === 'M') { color = 'yellow'; altitude = 0.2; radius = 0.4; }
+    else if (cls === 'C') { color = 'greenyellow'; altitude = 0.1; radius = 0.3; }
 
     return {
       lat: f.lat,
@@ -105,7 +107,8 @@ export default function GlobeVisualizer({
             selected={selectedDate}
             onChange={d => {
               setSelectedDate(d);
-              setStartDate(null); setEndDate(null);
+              setStartDate(null);
+              setEndDate(null);
             }}
             dateFormat="yyyy-MM-dd"
             isClearable
@@ -119,14 +122,18 @@ export default function GlobeVisualizer({
             <DatePicker
               selected={startDate}
               onChange={setStartDate}
-              selectsStart startDate={startDate} endDate={endDate}
+              selectsStart
+              startDate={startDate}
+              endDate={endDate}
               dateFormat="yyyy-MM-dd"
               placeholderText="Start"
             />
             <DatePicker
               selected={endDate}
               onChange={setEndDate}
-              selectsEnd startDate={startDate} endDate={endDate}
+              selectsEnd
+              startDate={startDate}
+              endDate={endDate}
               minDate={startDate}
               dateFormat="yyyy-MM-dd"
               placeholderText="End"
@@ -146,11 +153,33 @@ export default function GlobeVisualizer({
             <option>C</option>
           </select>
         </div>
+
+        <div className="control-group">
+          <label>⚠️ Risk Dashboard</label>
+          <button
+            onClick={() => setShowRiskPanel(prev => !prev)}
+            className="control-button"
+            style={{
+              width: '100%',
+              backgroundColor: '#c0392b',
+              color: 'white',
+              fontWeight: 'bold'
+            }}
+          >
+            {showRiskPanel ? 'Hide Risk Panel' : 'Show Risk Panel'}
+          </button>
+        </div>
+
+        {showRiskPanel && (
+          <div className="risk-dashboard-embedded">
+            <RiskDashboard flares={fetchedFlares} />
+          </div>
+        )}
       </div>
 
       <div className="top-buttons">
-        <button 
-          onClick={() => setAutoRotate(prev => !prev)} 
+        <button
+          onClick={() => setAutoRotate(prev => !prev)}
           className="control-button"
         >
           {autoRotate ? '⏸ Pause Rotation' : '▶ Resume Rotation'}
@@ -161,35 +190,35 @@ export default function GlobeVisualizer({
         <div className="info-header-flares">
           <h3>Solar Flares at a Glance</h3>
         </div>
-        
+
         <div className="info-section">
           <div className="info-title">What They Are</div>
           <div className="info-content">
             Intense bursts of X‑ray and extreme ultraviolet radiation from the Sun’s magnetic active regions.
           </div>
         </div>
-        
+
         <div className="info-section">
           <div className="info-title">Classification</div>
           <div className="info-content">
             C‑class (minor), M‑class (medium), X‑class (major); each step is 10× more powerful.
           </div>
         </div>
-        
+
         <div className="info-section">
           <div className="info-title">Frequency</div>
           <div className="info-content">
             During Solar Cycle peaks, you’ll see ~200 M‑class and ~10 X‑class flares per year.
           </div>
         </div>
-        
+
         <div className="info-section">
           <div className="info-title">Communications Impact</div>
           <div className="info-content">
             M‑class flares cause brief, localized HF‑band “fades”; X‑class flares trigger widespread blackout across the entire sunlit hemisphere.
           </div>
         </div>
-        
+
         <div className="info-section">
           <div className="info-title">Energy Scale</div>
           <div className="info-content">
@@ -201,7 +230,7 @@ export default function GlobeVisualizer({
       <Globe
         ref={globeEl}
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
-        backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png" 
+        backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
         backgroundColor="#000000"
         showAtmosphere
         atmosphereColor="blue"
@@ -220,15 +249,15 @@ export default function GlobeVisualizer({
         customThreeObjectUpdate={(obj, { lat, lng }) => {
           obj.position.setFromSphericalCoords(
             1,
-            (90 - lat) * (Math.PI/180),
-            (lng + 180) * (Math.PI/180)
+            (90 - lat) * (Math.PI / 180),
+            (lng + 180) * (Math.PI / 180)
           );
           obj.lookAt(obj.position.clone().multiplyScalar(2));
         }}
       />
 
       {loading && <div className="loading-overlay">Loading solar flare data...</div>}
-      {error   && <div className="error-overlay">⚠️ Error loading flare data</div>}
+      {error && <div className="error-overlay">⚠️ Error loading flare data</div>}
     </div>
   );
 }
